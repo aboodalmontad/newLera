@@ -1,6 +1,5 @@
-
 import React, { useState, useMemo } from 'react';
-import { ConversionMode, DenominationBreakdown } from '../types';
+import { ConversionMode } from '../types';
 
 const NEW_DENOMINATIONS = [500, 200, 100, 50, 25, 10];
 
@@ -9,7 +8,6 @@ interface DenomMetadata {
   text: string;
   border: string;
   accent: string;
-  motif: string;
   label: string;
   secondaryLabel: string;
   icon: string;
@@ -21,7 +19,6 @@ const DENOM_INFO: Record<number, DenomMetadata> = {
     text: 'text-[#78350f]', 
     border: 'border-[#eab308]', 
     accent: 'bg-[#eab308]', 
-    motif: '🌾', 
     label: 'سنابل القمح',
     secondaryLabel: 'خمس مئة ليرة',
     icon: '🌾'
@@ -31,7 +28,6 @@ const DENOM_INFO: Record<number, DenomMetadata> = {
     text: 'text-[#166534]', 
     border: 'border-[#4ade80]', 
     accent: 'bg-[#22c55e]', 
-    motif: '🫒', 
     label: 'غصن الزيتون',
     secondaryLabel: 'مئتا ليرة',
     icon: '🫒'
@@ -41,7 +37,6 @@ const DENOM_INFO: Record<number, DenomMetadata> = {
     text: 'text-[#9d174d]', 
     border: 'border-[#f472b6]', 
     accent: 'bg-[#ec4899]', 
-    motif: '☁️', 
     label: 'أزهار القطن',
     secondaryLabel: 'مئة ليرة',
     icon: '☁️'
@@ -51,7 +46,6 @@ const DENOM_INFO: Record<number, DenomMetadata> = {
     text: 'text-[#c2410c]', 
     border: 'border-[#fb923c]', 
     accent: 'bg-[#f97316]', 
-    motif: '🍊', 
     label: 'ثمار البرتقال',
     secondaryLabel: 'خمسون ليرة',
     icon: '🍊'
@@ -61,7 +55,6 @@ const DENOM_INFO: Record<number, DenomMetadata> = {
     text: 'text-[#3730a3]', 
     border: 'border-[#818cf8]', 
     accent: 'bg-[#6366f1]', 
-    motif: '🍇', 
     label: 'ثمار التوت',
     secondaryLabel: 'خمس وعشرون ليرة',
     icon: '🍇'
@@ -71,7 +64,6 @@ const DENOM_INFO: Record<number, DenomMetadata> = {
     text: 'text-[#be123c]', 
     border: 'border-[#fb7185]', 
     accent: 'bg-[#f43f5e]', 
-    motif: '🌹', 
     label: 'الوردة الشامية',
     secondaryLabel: 'عشر ليرات',
     icon: '🌹'
@@ -81,69 +73,35 @@ const DENOM_INFO: Record<number, DenomMetadata> = {
 const Banknote: React.FC<{ 
   value: number; 
   count?: number; 
-  size?: 'sm' | 'md';
   onClick?: () => void;
-  onRemove?: (e: React.MouseEvent) => void;
   disabled?: boolean;
-}> = ({ value, count, size = 'md', onClick, onRemove, disabled }) => {
+}> = ({ value, count, onClick, disabled }) => {
   const info = DENOM_INFO[value];
-  const isSmall = size === 'sm';
 
   return (
     <div 
       onClick={!disabled ? onClick : undefined}
-      className={`relative overflow-hidden rounded-xl border-2 ${info.border} ${info.bg} ${isSmall ? 'p-3' : 'p-5'} 
+      className={`relative overflow-hidden rounded-2xl border-2 ${info.border} ${info.bg} p-4
       shadow-sm transition-all duration-200 
-      ${!disabled && onClick ? 'cursor-pointer hover:shadow-lg active:scale-95' : 'cursor-not-allowed'} 
-      ${disabled ? 'opacity-40 grayscale-[0.5] scale-[0.98]' : ''}
-      group flex flex-col justify-between aspect-[1.8/1] select-none`}
+      ${!disabled && onClick ? 'cursor-pointer hover:shadow-md active:scale-95' : 'cursor-default'} 
+      ${disabled ? 'opacity-30 grayscale' : 'opacity-100'}
+      group flex flex-col justify-between aspect-[1.6/1] select-none`}
     >
-      {/* Security Thread */}
-      <div className={`absolute top-0 right-[25%] bottom-0 w-1 ${info.accent} opacity-10 border-x border-black/5`}></div>
-      
-      {/* Central Geometric Shape */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 opacity-[0.03] pointer-events-none">
-        <svg viewBox="0 0 100 100" className="w-full h-full fill-current text-black">
-           <path d="M50 0 L61 39 L100 50 L61 61 L50 100 L39 61 L0 50 L39 39 Z" />
-        </svg>
-      </div>
-
-      <div className="flex justify-between items-start relative z-10">
+      <div className="flex justify-between items-start">
         <div className="flex flex-col">
-          <span className={`${isSmall ? 'text-xl' : 'text-3xl'} font-black ${info.text} leading-none`}>{value}</span>
-          <span className={`text-[8px] font-bold ${info.text} opacity-60 leading-tight mt-1`}>مصرف سورية المركزي</span>
+          <span className="text-2xl font-black text-slate-800 leading-none">{value}</span>
+          <span className="text-[7px] font-bold text-slate-400 mt-0.5">سورية</span>
         </div>
-        <div className={`${isSmall ? 'text-2xl' : 'text-4xl'} filter drop-shadow-sm`}>{info.icon}</div>
+        <div className="text-3xl filter drop-shadow-sm">{info.icon}</div>
       </div>
 
-      <div className="flex justify-between items-end relative z-10">
-        <div className="max-w-[70%]">
-          <div className={`text-[7px] font-bold ${info.text} opacity-50 uppercase tracking-tighter mb-0.5`}>{info.label}</div>
-          <div className={`${isSmall ? 'text-[9px]' : 'text-xs'} font-black ${info.text}`}>{info.secondaryLabel}</div>
-        </div>
+      <div className="flex justify-between items-end">
+        <div className="text-[9px] font-bold text-slate-500">{info.secondaryLabel}</div>
         {count !== undefined && count > 0 && (
-          <div className="flex flex-col items-end gap-1">
-             <div className="bg-white/80 backdrop-blur-md px-2 py-1 rounded-lg border border-black/5 shadow-sm">
-                <span className={`text-sm font-black ${info.text}`}>{count}</span>
-                <span className={`text-[9px] font-bold ${info.text} mr-1`}>ورقة</span>
-             </div>
-             {onRemove && (
-               <button 
-                 onClick={onRemove}
-                 className="bg-red-500 text-white p-1 rounded-full text-[10px] hover:bg-red-600 transition-colors shadow-sm"
-                 title="تقليل العدد"
-               >
-                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                   <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                 </svg>
-               </button>
-             )}
+          <div className="bg-white/80 backdrop-blur-sm px-2 py-0.5 rounded-lg border border-black/5 shadow-xs">
+             <span className="text-xs font-black text-slate-800">{count}</span>
           </div>
         )}
-      </div>
-
-      <div className={`absolute bottom-1 right-2 text-[5px] font-mono ${info.text} opacity-20`}>
-        D 5989589
       </div>
     </div>
   );
@@ -152,17 +110,8 @@ const Banknote: React.FC<{
 const ConverterCard: React.FC = () => {
   const [mode, setMode] = useState<ConversionMode>(ConversionMode.OLD_TO_NEW);
   const [inputValue, setInputValue] = useState<string>('');
-  
-  // State for the manual counter/wallet
   const [wallet, setWallet] = useState<Record<number, number>>({});
 
-  const result = useMemo(() => {
-    const val = parseFloat(inputValue);
-    if (isNaN(val) || val < 0) return 0;
-    return mode === ConversionMode.OLD_TO_NEW ? val / 100 : val * 100;
-  }, [inputValue, mode]);
-
-  // Target amount in NEW currency
   const targetValueNew = useMemo(() => {
     const val = parseFloat(inputValue);
     if (isNaN(val) || val < 0) return 0;
@@ -170,48 +119,43 @@ const ConverterCard: React.FC = () => {
   }, [inputValue, mode]);
 
   const walletTotal = useMemo<number>(() => {
-    // Explicitly cast count to number to resolve potential TS inference issues with Record index signatures during arithmetic operations
-    return Object.entries(wallet).reduce((acc: number, [denom, count]) => acc + (Number(denom) * (count as number)), 0);
+    return Object.entries(wallet).reduce((acc: number, [denom, count]) => acc + (Number(denom) * (Number(count) || 0)), 0);
   }, [wallet]);
 
+  const result = useMemo(() => {
+    const val = parseFloat(inputValue);
+    if (isNaN(val) || val < 0) return 0;
+    return mode === ConversionMode.OLD_TO_NEW ? val / 100 : val * 100;
+  }, [inputValue, mode]);
+
+  const handleManualCountChange = (denom: number, requestedValue: string) => {
+    let count = parseInt(requestedValue);
+    if (isNaN(count) || count < 0) count = 0;
+
+    // Fix for line 138: Explicitly typing the accumulator and ensuring numeric values for arithmetic operations.
+    const otherTotal = Object.entries(wallet).reduce((acc: number, [d, c]) => {
+      const dNum = Number(d);
+      if (dNum === denom) return acc;
+      return acc + (dNum * (c as number || 0));
+    }, 0);
+
+    // المنطق: لا نسمح بتجاوز المبلغ المطلوب
+    const maxAllowed = Math.floor((targetValueNew - otherTotal) / denom);
+    const finalCount = Math.min(count, maxAllowed > 0 ? maxAllowed : 0);
+
+    setWallet(prev => ({
+      ...prev,
+      [denom]: finalCount
+    }));
+  };
+
   const addToWallet = (denom: number) => {
-    // Stop adding if it exceeds the target amount in new currency
-    if (walletTotal + denom > targetValueNew) {
-      return;
-    }
+    if (walletTotal + denom > targetValueNew) return;
     setWallet(prev => ({
       ...prev,
       [denom]: (prev[denom] || 0) + 1
     }));
   };
-
-  const removeFromWallet = (e: React.MouseEvent, denom: number) => {
-    e.stopPropagation();
-    setWallet(prev => {
-      const next = { ...prev };
-      if (next[denom] > 0) next[denom] -= 1;
-      if (next[denom] === 0) delete next[denom];
-      return next;
-    });
-  };
-
-  const breakdown = useMemo(() => {
-    let amountToBreak = mode === ConversionMode.OLD_TO_NEW ? result : parseFloat(inputValue);
-    if (isNaN(amountToBreak) || amountToBreak <= 0) return [];
-
-    const resultList: DenominationBreakdown[] = [];
-    let remaining = Math.floor(amountToBreak);
-
-    for (const bill of NEW_DENOMINATIONS) {
-      const count = Math.floor(remaining / bill);
-      if (count > 0) {
-        resultList.push({ bill, count });
-        remaining %= bill;
-      }
-    }
-
-    return resultList;
-  }, [result, inputValue, mode]);
 
   const toggleMode = () => {
     setMode(prev => prev === ConversionMode.OLD_TO_NEW ? ConversionMode.NEW_TO_OLD : ConversionMode.OLD_TO_NEW);
@@ -222,155 +166,140 @@ const ConverterCard: React.FC = () => {
   const clearWallet = () => setWallet({});
 
   const progressPercentage = targetValueNew > 0 ? (walletTotal / targetValueNew) * 100 : 0;
+  const isComplete = Math.abs(walletTotal - targetValueNew) < 0.01 && targetValueNew > 0;
 
   return (
     <div className="space-y-8">
-      {/* Mode Switcher */}
-      <div className="flex items-center justify-between bg-slate-50 p-4 rounded-3xl border border-slate-100 shadow-inner">
+      {/* Switcher */}
+      <div className="flex items-center justify-between bg-slate-50 p-3 rounded-2xl border border-slate-100">
         <div className="text-right">
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">تجاه التحويل</p>
-          <div className="flex items-center gap-2">
-             <div className={`w-2.5 h-2.5 rounded-full ${mode === ConversionMode.OLD_TO_NEW ? 'bg-amber-500' : 'bg-emerald-500'} animate-pulse`}></div>
-             <p className="text-lg font-bold text-slate-800">
-              {mode === ConversionMode.OLD_TO_NEW ? 'من القديمة إلى الجديدة' : 'من الجديدة إلى القديمة'}
-            </p>
-          </div>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">نظام التحويل</p>
+          <p className="text-base font-bold text-slate-800">
+            {mode === ConversionMode.OLD_TO_NEW ? 'من القديمة إلى الجديدة' : 'من الجديدة إلى القديمة'}
+          </p>
         </div>
         <button 
           onClick={toggleMode}
-          className="p-3 bg-white rounded-2xl shadow-sm border border-slate-200 text-slate-600 hover:text-emerald-600 hover:border-emerald-200 transition-all active:scale-90"
+          className="p-2.5 bg-white rounded-xl shadow-sm border border-slate-200 text-emerald-600 hover:bg-emerald-50 transition-all active:scale-90"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
           </svg>
         </button>
       </div>
 
-      {/* Input Field */}
+      {/* Input */}
       <div className="relative">
-        <label className="block text-slate-500 text-xs font-bold mb-2 pr-2 uppercase tracking-widest">المبلغ المراد تحويله</label>
-        <div className="relative group">
+        <label className="block text-slate-400 text-[10px] font-bold mb-1.5 pr-2 uppercase tracking-widest">المبلغ المراد تحويله</label>
+        <div className="relative">
           <input
             type="number"
             value={inputValue}
             onChange={(e) => {
               setInputValue(e.target.value);
-              setWallet({}); // Reset wallet on input change
+              setWallet({}); 
             }}
-            placeholder="أدخل المبلغ هنا..."
-            className="w-full text-4xl font-black py-7 px-8 rounded-[2rem] border-2 border-slate-100 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 outline-none transition-all placeholder:text-slate-200 pr-12 text-right"
+            placeholder="0.00"
+            className="w-full text-4xl font-black py-6 px-6 rounded-3xl border-2 border-slate-100 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 outline-none transition-all placeholder:text-slate-100 pr-12 text-right"
             dir="rtl"
           />
-          <div className="absolute left-8 top-1/2 -translate-y-1/2 text-slate-300 font-bold text-sm bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
-            {mode === ConversionMode.OLD_TO_NEW ? 'ليرة قديمة' : 'ليرة جديدة'}
+          <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 font-bold text-xs bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
+            {mode === ConversionMode.OLD_TO_NEW ? 'قديمة' : 'جديدة'}
           </div>
         </div>
       </div>
 
-      {/* Result Display */}
+      {/* Result */}
       {inputValue && (
-        <div className={`p-8 rounded-[2.5rem] shadow-2xl transition-all duration-500 transform ${mode === ConversionMode.OLD_TO_NEW ? 'bg-gradient-to-br from-emerald-600 to-teal-700' : 'bg-gradient-to-br from-amber-500 to-orange-600'} text-white`}>
-          <p className="text-white/70 text-xs font-bold mb-2 uppercase tracking-widest">القيمة المقابلة:</p>
-          <div className="flex items-baseline gap-3 overflow-hidden">
-            <h2 className="text-5xl md:text-6xl font-black tracking-tight truncate" dir="ltr">
+        <div className={`p-6 rounded-3xl shadow-xl transition-all duration-300 ${mode === ConversionMode.OLD_TO_NEW ? 'bg-emerald-600' : 'bg-amber-500'} text-white`}>
+          <p className="text-white/60 text-[10px] font-bold mb-1 uppercase tracking-widest">القيمة الناتجة:</p>
+          <div className="flex items-baseline gap-2">
+            <h2 className="text-4xl font-black tracking-tight truncate">
               {result.toLocaleString('en-US', { maximumFractionDigits: 2 })}
             </h2>
-            <span className="text-xl font-bold opacity-80 whitespace-nowrap">
+            <span className="text-sm font-bold opacity-80">
               {mode === ConversionMode.OLD_TO_NEW ? 'ليرة جديدة' : 'ليرة قديمة'}
             </span>
           </div>
-          <div className="mt-5 pt-4 border-t border-white/20 flex justify-between items-center text-[10px] font-bold opacity-70">
-             <span>١٠٠ ليرة قديمة = ١ ليرة جديدة</span>
-             <span className="bg-white/10 px-2 py-1 rounded">إصدار ٢٠٢٦</span>
-          </div>
         </div>
       )}
 
-      {/* Manual Counter / Wallet Section */}
+      {/* Wallet Progress */}
       {targetValueNew > 0 && (
-        <div className="mt-12 bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 space-y-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <h3 className="font-black text-slate-800">تجميع المبلغ (محفظتي)</h3>
+              <span className="text-lg">💰</span>
+              <h3 className="font-bold text-slate-800 text-sm">تجميع المبلغ (محفظتي)</h3>
             </div>
             {walletTotal > 0 && (
-              <button 
-                onClick={clearWallet}
-                className="text-[10px] font-bold text-red-400 hover:text-red-600 uppercase tracking-wider"
-              >
-                تفريغ المحفظة
-              </button>
+              <button onClick={clearWallet} className="text-[10px] font-bold text-red-400 hover:text-red-500">تفريغ</button>
             )}
           </div>
 
-          <div className="bg-slate-50 p-6 rounded-2xl text-center space-y-4">
-            <div>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mb-2">التقدم نحو المبلغ المطلوب</p>
-              <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden shadow-inner">
-                <div 
-                  className={`h-full transition-all duration-500 rounded-full ${progressPercentage >= 100 ? 'bg-emerald-500' : 'bg-emerald-400 animate-pulse'}`}
-                  style={{ width: `${Math.min(progressPercentage, 100)}%` }}
-                ></div>
-              </div>
+          <div className="space-y-2">
+            <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+              <div 
+                className={`h-full transition-all duration-500 ${isComplete ? 'bg-emerald-500' : 'bg-emerald-400 animate-pulse'}`}
+                style={{ width: `${Math.min(progressPercentage, 100)}%` }}
+              ></div>
             </div>
-
-            <div className="flex flex-col items-center">
-              <div className="text-4xl font-black text-slate-800">
-                {walletTotal.toLocaleString()} <span className="text-sm">/ {targetValueNew.toLocaleString()}</span>
-              </div>
-              <div className="text-emerald-600 font-bold text-xs mt-1">
-                {progressPercentage >= 100 ? 'تم تجميع كامل المبلغ بالعملة الجديدة ✅' : `متبقي ${(targetValueNew - walletTotal).toLocaleString()} ليرة جديدة`}
-              </div>
+            <div className="flex justify-between items-center text-[10px] font-bold">
+              <span className={isComplete ? 'text-emerald-600' : 'text-slate-400'}>
+                {isComplete ? 'تم تجميع المبلغ بالكامل ✅' : `${walletTotal.toLocaleString()} / ${targetValueNew.toLocaleString()}`}
+              </span>
+              {!isComplete && (
+                <span className="text-amber-500">المتبقي: {(targetValueNew - walletTotal).toLocaleString()}</span>
+              )}
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {Object.entries(wallet).map(([denom, count]) => (
-              <div key={denom} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-xl shadow-sm">
-                <div className="flex items-center gap-2">
-                    <span className="text-lg font-black text-slate-700">{denom}</span>
-                    <span className="text-[10px] text-slate-400">× {count}</span>
+          {/* Denomination Manual Inputs */}
+          <div className="grid grid-cols-2 gap-3">
+            {NEW_DENOMINATIONS.map(denom => (
+              <div key={denom} className="flex flex-col gap-1.5 p-3 bg-slate-50/50 rounded-2xl border border-slate-100">
+                <div className="flex items-center justify-between">
+                   <span className="text-[10px] font-black text-slate-500">{denom} ليرة</span>
+                   <span className="text-xs">{DENOM_INFO[denom].icon}</span>
                 </div>
-                <button 
-                  onClick={(e) => removeFromWallet(e, Number(denom))}
-                  className="text-slate-300 hover:text-red-500 transition-colors"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
-                  </svg>
-                </button>
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="number"
+                    value={wallet[denom] || ''}
+                    onChange={(e) => handleManualCountChange(denom, e.target.value)}
+                    placeholder="0"
+                    disabled={isComplete && !wallet[denom]}
+                    className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-center text-sm font-black text-slate-800 focus:ring-2 focus:ring-emerald-500 outline-none transition-all disabled:opacity-50"
+                  />
+                  <button 
+                    onClick={() => addToWallet(denom)}
+                    disabled={isComplete || (walletTotal + denom > targetValueNew)}
+                    className="p-1.5 bg-emerald-100 text-emerald-600 rounded-lg hover:bg-emerald-200 disabled:opacity-30 disabled:hover:bg-emerald-100 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             ))}
-            {Object.keys(wallet).length === 0 && (
-              <div className="col-span-full py-4 text-center text-slate-300 text-xs italic">
-                انقر على الفئات أدناه لتجميع المبلغ...
-              </div>
-            )}
           </div>
         </div>
       )}
 
-      {/* Banknote Gallery & Interaction */}
-      <div className="mt-20 pt-10 border-t border-slate-100">
-        <h3 className="text-center text-slate-400 text-[10px] font-black uppercase tracking-[0.4em] mb-10">
-          {targetValueNew > 0 ? 'اختر الفئات التي تملكها لتغطية المبلغ' : 'دليل الفئات النقدية الجديدة'}
-        </h3>
-        <div className="grid grid-cols-2 gap-5">
-          {NEW_DENOMINATIONS.sort((a,b) => a-b).map(val => (
+      {/* Guide / Quick Gallery */}
+      <div className="mt-10 pt-8 border-t border-slate-100">
+        <p className="text-center text-slate-400 text-[9px] font-black uppercase tracking-[0.2em] mb-6">
+          انقر للإضافة السريعة أو أدخل العدد يدوياً أعلاه
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {NEW_DENOMINATIONS.map(val => (
             <Banknote 
               key={val} 
               value={val} 
-              size="sm" 
               onClick={() => addToWallet(val)}
               count={wallet[val]}
-              onRemove={(e) => removeFromWallet(e, val)}
-              // Banknote is disabled if adding it would exceed the target amount
-              disabled={targetValueNew > 0 && walletTotal + val > targetValueNew}
+              disabled={targetValueNew > 0 && (walletTotal + val > targetValueNew) && !isComplete}
             />
           ))}
         </div>
