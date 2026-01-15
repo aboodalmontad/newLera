@@ -1,33 +1,33 @@
-const CACHE_NAME = 'syrian-lira-ultimate-v10';
+const CACHE_NAME = 'syrian-lira-v2026-final';
+
+// قائمة الملفات الضرورية جداً للتشغيل
 const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './index.tsx',
-  './App.tsx',
-  './types.ts',
-  './metadata.json',
-  './manifest.json',
-  './components/ConverterCard.tsx',
+  '/',
+  '/index.html',
+  '/index.tsx',
+  '/App.tsx',
+  '/types.ts',
+  '/manifest.json',
+  '/components/ConverterCard.tsx',
   'https://cdn.tailwindcss.com',
   'https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap',
-  'https://esm.sh/react@^19.2.3',
-  'https://esm.sh/react-dom@^19.2.3/',
-  'https://esm.sh/react@^19.2.3/es2022/react.mjs',
-  'https://esm.sh/react-dom@^19.2.3/es2022/react-dom.mjs'
+  'https://esm.sh/react@19.0.0',
+  'https://esm.sh/react-dom@19.0.0',
+  'https://esm.sh/react@19.0.0/es2022/react.mjs',
+  'https://esm.sh/react-dom@19.0.0/es2022/react-dom.mjs'
 ];
 
-// التثبيت: تخزين كل شيء فوراً
+// التثبيت: تخزين الملفات فوراً وبشكل إجباري
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('جاري تأمين ملفات التشغيل أوفلاين...');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
   self.skipWaiting();
 });
 
-// التفعيل: تنظيف الذاكرة القديمة
+// التفعيل: مسح أي ذاكرة قديمة
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -39,12 +39,12 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// الجلب: الذاكرة أولاً ثم الشبكة
+// الجلب: محاولة الذاكرة أولاً، ثم الشبكة
 self.addEventListener('fetch', (event) => {
-  // للطلبات التي تطلب صفحات (Navigation)
+  // التعامل مع طلبات الصفحة الرئيسية
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      caches.match('./index.html').then((response) => {
+      caches.match('/index.html').then((response) => {
         return response || fetch(event.request);
       })
     );
@@ -57,7 +57,7 @@ self.addEventListener('fetch', (event) => {
         return cachedResponse;
       }
       return fetch(event.request).then((networkResponse) => {
-        // تخزين أي ملف جديد يتم جلبه تلقائياً
+        // تخزين أي ملف جديد يتم جلبه تلقائياً للمستقبل
         if (networkResponse && networkResponse.status === 200) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -66,9 +66,9 @@ self.addEventListener('fetch', (event) => {
         }
         return networkResponse;
       }).catch(() => {
-        // في حال الفشل التام وأنت أوفلاين
-        if (event.request.destination === 'image') {
-          return caches.match('https://cdn-icons-png.flaticon.com/512/2489/2489756.png');
+        // إذا فشل كل شيء (أوفلاين)، حاول إرجاع index.html
+        if (event.request.destination === 'document') {
+          return caches.match('/index.html');
         }
       });
     })

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ConverterCard from './components/ConverterCard';
 
 const SyrianFlag = () => (
@@ -15,6 +15,18 @@ const SyrianFlag = () => (
 );
 
 const App: React.FC = () => {
+  const [isOfflineReady, setIsOfflineReady] = useState(false);
+
+  useEffect(() => {
+    // التحقق من حالة الـ Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(() => {
+        // بمجرد أن يصبح الـ SW جاهزاً، ننتظر قليلاً للتأكد من انتهاء التخزين
+        setTimeout(() => setIsOfflineReady(true), 2000);
+      });
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#fcfcfc] flex flex-col items-center py-6 px-4 md:py-12 select-none overflow-x-hidden">
       <header className="w-full max-w-2xl text-center mb-10 animate-in">
@@ -38,14 +50,21 @@ const App: React.FC = () => {
       </main>
 
       <footer className="mt-16 text-slate-400 text-xs text-center space-y-4 pb-12 opacity-80 animate-in delay-100">
-        <div className="flex items-center justify-center gap-4 font-bold text-slate-500">
-           <span>١٠٠ ليرة قديمة = ١ ليرة جديدة</span>
-        </div>
-        
         <div className="flex flex-col items-center gap-3">
            <div className="flex flex-col items-center gap-1">
              <p className="font-black uppercase tracking-[0.3em] text-slate-400">تطبيق وطني خدمي سريع &bull; ٢٠٢٦</p>
-             <p className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100/50">يعمل بالكامل بدون إنترنت ✅</p>
+             
+             {isOfflineReady ? (
+               <div className="flex items-center gap-1.5 text-emerald-600 bg-emerald-50 px-4 py-1.5 rounded-full border border-emerald-100 animate-in zoom-in">
+                 <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                 <p className="text-[10px] font-bold">جاهز للعمل بالكامل بدون إنترنت ✅</p>
+               </div>
+             ) : (
+               <div className="flex items-center gap-1.5 text-slate-400 bg-slate-100 px-4 py-1.5 rounded-full border border-slate-200">
+                 <span className="w-2 h-2 bg-slate-300 rounded-full animate-pulse"></span>
+                 <p className="text-[10px] font-bold">جاري تأمين النسخة الاحتياطية للأوفلاين...</p>
+               </div>
+             )}
            </div>
            
            <div className="pt-6 border-t border-slate-100 w-48 flex flex-col items-center gap-2">
