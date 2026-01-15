@@ -1,7 +1,6 @@
 
 import React from 'react';
 import ConverterCard from './components/ConverterCard';
-import AIAssistant from './components/AIAssistant';
 
 const App: React.FC = () => {
   return (
@@ -32,9 +31,6 @@ const App: React.FC = () => {
         </div>
         <p className="font-medium uppercase tracking-widest opacity-30">تطبيق وطني خدمي &bull; ٢٠٢٦</p>
       </footer>
-
-      {/* Adding AI Assistant for context-aware help */}
-      <AIAssistant />
     </div>
   );
 };
