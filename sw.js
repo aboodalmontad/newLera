@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'syrian-lira-v2026-no-ai';
+const CACHE_NAME = 'syrian-lira-v2026-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
