@@ -1,4 +1,4 @@
-const CACHE_NAME = 'syrian-lira-pwa-v6';
+const CACHE_NAME = 'syrian-lira-offline-v7';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -17,7 +17,7 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Caching assets for clean offline support');
+      console.log('Caching assets for total offline support');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
@@ -38,6 +38,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
+      // إرجاع الملف من الذاكرة إذا وجد، وإلا جلبه من الشبكة
       if (cachedResponse) return cachedResponse;
       
       return fetch(event.request).then((networkResponse) => {
@@ -52,6 +53,7 @@ self.addEventListener('fetch', (event) => {
         
         return networkResponse;
       }).catch(() => {
+        // إذا فشل كل شيء وكان المستخدم يحاول فتح الصفحة الرئيسية، نعرض index.html المخزنة
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }
