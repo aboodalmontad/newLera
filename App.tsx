@@ -48,9 +48,12 @@ const App: React.FC = () => {
              <p className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100/50">جاهز للعمل بالكامل بدون إنترنت ✅</p>
            </div>
            
-           <div className="pt-4 border-t border-slate-100 w-32 flex flex-col items-center gap-2">
+           <div className="pt-6 border-t border-slate-100 w-48 flex flex-col items-center gap-2">
              <span className="text-red-500 text-lg">❤️</span>
-             <p className="text-sm font-black text-slate-800 tracking-wide">هدية لسورية الحبيبة</p>
+             <div className="space-y-1 text-center">
+               <p className="text-sm font-black text-slate-800 tracking-wide">هدية لسورية الحبيبة</p>
+               <p className="text-xs font-bold text-slate-500 italic">عبد الرحمن نحوي</p>
+             </div>
            </div>
         </div>
       </footer>

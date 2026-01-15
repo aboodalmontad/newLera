@@ -54,7 +54,6 @@ const Banknote: React.FC<BanknoteProps> = ({ value, count, onCountChange, onAuto
           className="relative"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* حقل العدد - تم تكبيره */}
           <input
             type="number"
             value={count || ''}
@@ -82,7 +81,6 @@ const ConverterCard: React.FC = () => {
   const [inputValue, setInputValue] = useState<string>('');
   const [wallet, setWallet] = useState<Record<number, number>>({});
 
-  // دالة لتنسيق الرقم بالفواصل
   const formatNumber = (val: string) => {
     const clean = val.replace(/,/g, '');
     if (!clean || isNaN(Number(clean))) return clean;
@@ -109,10 +107,8 @@ const ConverterCard: React.FC = () => {
 
   const handleAutoFill = (denom: number) => {
     if (targetValueNew === 0) return;
-    
     const remaining = targetValueNew - walletTotal;
     if (remaining <= 0) return;
-
     const addedCount = Math.floor(remaining / denom);
     if (addedCount > 0) {
       setWallet(prev => ({
@@ -127,16 +123,13 @@ const ConverterCard: React.FC = () => {
       setWallet(prev => ({ ...prev, [denom]: requestedCount }));
       return;
     }
-
     const otherTotal = Object.entries(wallet).reduce((acc: number, [d, c]) => {
       const dNum = Number(d);
       if (dNum === denom) return acc;
       return acc + (dNum * (Number(c) || 0));
     }, 0);
-
     const maxAllowed = Math.floor((targetValueNew - otherTotal) / denom);
     const finalCount = Math.max(0, Math.min(requestedCount, maxAllowed));
-
     setWallet(prev => ({
       ...prev,
       [denom]: finalCount
@@ -220,10 +213,10 @@ const ConverterCard: React.FC = () => {
       {/* Progress & Denomination Grid */}
       <div className="space-y-6 pt-6 border-t border-slate-100">
         {targetValueNew > 0 && (
-          <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 space-y-5">
+          <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 space-y-6">
             <div className="flex justify-between items-center">
               <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
-                <span className="text-lg">📦</span> تجميع المبلغ
+                <span className="text-lg">📦</span> تجميع المبلغ بالفئات
               </h3>
               {walletTotal > 0 && (
                 <button 
@@ -235,24 +228,37 @@ const ConverterCard: React.FC = () => {
               )}
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="w-full h-4 bg-slate-200 rounded-full overflow-hidden shadow-inner">
                 <div 
                   className={`h-full transition-all duration-700 ${isComplete ? 'bg-emerald-500' : 'bg-emerald-400 animate-pulse'}`}
                   style={{ width: `${Math.min(progressPercentage, 100)}%` }}
                 ></div>
               </div>
-              <div className="flex justify-between items-end font-black">
-                <div className={`text-4xl leading-none ${isComplete ? 'text-emerald-600' : 'text-slate-700'}`}>
-                  {walletTotal.toLocaleString()}
-                  <span className="text-sm text-slate-400 font-bold mx-2">/ {targetValueNew.toLocaleString()}</span>
+              
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 font-black">
+                <div className={`leading-none ${isComplete ? 'text-emerald-600' : 'text-slate-700'}`}>
+                  <p className="text-[10px] text-slate-400 mb-2 uppercase tracking-widest">المجموع الحالي</p>
+                  <div className="text-4xl">
+                    {walletTotal.toLocaleString()}
+                    <span className="text-sm text-slate-400 font-bold mx-2">/ {targetValueNew.toLocaleString()}</span>
+                  </div>
                 </div>
-                <div className="flex flex-col items-end">
-                  {!isComplete && (
-                    <span className="text-xs text-amber-500 mb-1">المتبقي: {(targetValueNew - walletTotal).toLocaleString()}</span>
-                  )}
-                  {isComplete && <span className="text-xs text-emerald-600 mb-1 font-bold">اكتمل التجميع بنجاح ✅</span>}
-                </div>
+
+                {!isComplete && (
+                  <div className="bg-amber-100/50 border-2 border-amber-200 px-6 py-3 rounded-[2rem] flex flex-col items-center md:items-end min-w-[140px] shadow-sm animate-in zoom-in duration-300">
+                    <span className="text-[10px] text-amber-700 font-black uppercase tracking-widest mb-1">المبلغ المتبقي</span>
+                    <span className="text-3xl text-amber-700 tracking-tighter">
+                      {(targetValueNew - walletTotal).toLocaleString()}
+                    </span>
+                  </div>
+                )}
+
+                {isComplete && (
+                  <div className="bg-emerald-100 border-2 border-emerald-200 px-6 py-3 rounded-[2rem] flex flex-col items-center md:items-end shadow-sm animate-bounce">
+                    <span className="text-sm text-emerald-700 font-black">اكتمل التجميع بنجاح ✅</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
