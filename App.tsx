@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ConverterCard from './components/ConverterCard';
 
@@ -38,13 +37,21 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      <footer className="mt-16 text-slate-400 text-xs text-center space-y-3 pb-12 opacity-60">
-        <div className="flex items-center justify-center gap-4 font-bold">
+      <footer className="mt-16 text-slate-400 text-xs text-center space-y-4 pb-12 opacity-80 animate-in delay-100">
+        <div className="flex items-center justify-center gap-4 font-bold text-slate-500">
            <span>١٠٠ ليرة قديمة = ١ ليرة جديدة</span>
         </div>
-        <div className="flex flex-col items-center gap-1">
-           <p className="font-black uppercase tracking-[0.3em]">تطبيق وطني خدمي سريع &bull; ٢٠٢٦</p>
-           <p className="text-[10px] font-medium">يعمل بالكامل بدون اتصال بالإنترنت</p>
+        
+        <div className="flex flex-col items-center gap-3">
+           <div className="flex flex-col items-center gap-1">
+             <p className="font-black uppercase tracking-[0.3em] text-slate-400">تطبيق وطني خدمي سريع &bull; ٢٠٢٦</p>
+             <p className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100/50">جاهز للعمل بالكامل بدون إنترنت ✅</p>
+           </div>
+           
+           <div className="pt-4 border-t border-slate-100 w-32 flex flex-col items-center gap-2">
+             <span className="text-red-500 text-lg">❤️</span>
+             <p className="text-sm font-black text-slate-800 tracking-wide">هدية لسورية الحبيبة</p>
+           </div>
         </div>
       </footer>
     </div>

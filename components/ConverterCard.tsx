@@ -35,25 +35,26 @@ const Banknote: React.FC<BanknoteProps> = ({ value, count, onCountChange, onAuto
   return (
     <div 
       onClick={() => !disabled && onAutoFill()}
-      className={`relative overflow-hidden rounded-[2rem] border-2 ${info.border} ${info.bg} p-5
+      className={`relative overflow-hidden rounded-[2.5rem] border-2 ${info.border} ${info.bg} p-6
       shadow-sm transition-all duration-300 
       ${!disabled ? 'cursor-pointer hover:shadow-xl active:scale-95' : 'cursor-default opacity-40 grayscale-[0.3]'} 
-      group flex flex-col justify-between aspect-[1.5/1] select-none`}
+      group flex flex-col justify-between aspect-[1.4/1] select-none`}
     >
       <div className="flex justify-between items-start">
         <div className="flex flex-col">
-          <span className={`text-3xl font-black ${info.text} leading-none`}>{value}</span>
-          <span className={`text-[8px] font-bold ${info.text} opacity-50 mt-1 uppercase tracking-tighter`}>ليرة سورية جديدة</span>
+          <span className={`text-4xl font-black ${info.text} leading-none`}>{value}</span>
+          <span className={`text-[9px] font-bold ${info.text} opacity-50 mt-1 uppercase tracking-tighter`}>ليرة سورية جديدة</span>
         </div>
-        <div className="text-4xl filter drop-shadow-md transform group-hover:scale-110 transition-transform">{info.icon}</div>
+        <div className="text-5xl filter drop-shadow-md transform group-hover:scale-110 transition-transform">{info.icon}</div>
       </div>
 
       <div className="flex justify-between items-end gap-2">
-        <div className={`text-[10px] font-bold ${info.text} opacity-60`}>{info.secondaryLabel}</div>
+        <div className={`text-xs font-bold ${info.text} opacity-60 mb-1`}>{info.secondaryLabel}</div>
         <div 
           className="relative"
           onClick={(e) => e.stopPropagation()}
         >
+          {/* حقل العدد - تم تكبيره */}
           <input
             type="number"
             value={count || ''}
@@ -62,11 +63,11 @@ const Banknote: React.FC<BanknoteProps> = ({ value, count, onCountChange, onAuto
               onCountChange(isNaN(val) ? 0 : val);
             }}
             placeholder="٠"
-            className={`w-14 h-10 bg-white/90 backdrop-blur-md rounded-xl text-center font-black ${info.text} 
-            border border-black/5 shadow-sm focus:ring-2 focus:ring-emerald-500 outline-none transition-all`}
+            className={`w-20 h-14 bg-white/95 backdrop-blur-md rounded-2xl text-center text-2xl font-black ${info.text} 
+            border-2 border-black/5 shadow-md focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all`}
           />
           {count > 0 && (
-            <div className="absolute -top-3 -right-2 bg-emerald-500 text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold shadow-sm">
+            <div className="absolute -top-4 -right-2 bg-slate-900 text-white text-[10px] px-2.5 py-1 rounded-full font-black shadow-lg animate-in zoom-in duration-300">
               العدد
             </div>
           )}
@@ -81,8 +82,16 @@ const ConverterCard: React.FC = () => {
   const [inputValue, setInputValue] = useState<string>('');
   const [wallet, setWallet] = useState<Record<number, number>>({});
 
+  // دالة لتنسيق الرقم بالفواصل
+  const formatNumber = (val: string) => {
+    const clean = val.replace(/,/g, '');
+    if (!clean || isNaN(Number(clean))) return clean;
+    return Number(clean).toLocaleString('en-US');
+  };
+
   const targetValueNew = useMemo(() => {
-    const val = parseFloat(inputValue);
+    const cleanValue = inputValue.replace(/,/g, '');
+    const val = parseFloat(cleanValue);
     if (isNaN(val) || val < 0) return 0;
     return mode === ConversionMode.OLD_TO_NEW ? val / 100 : val;
   }, [inputValue, mode]);
@@ -92,12 +101,12 @@ const ConverterCard: React.FC = () => {
   }, [wallet]);
 
   const result = useMemo(() => {
-    const val = parseFloat(inputValue);
+    const cleanValue = inputValue.replace(/,/g, '');
+    const val = parseFloat(cleanValue);
     if (isNaN(val) || val < 0) return 0;
     return mode === ConversionMode.OLD_TO_NEW ? val / 100 : val * 100;
   }, [inputValue, mode]);
 
-  // منطق الملء التلقائي المطور: يكمل المبلغ المتبقي باستخدام هذه الفئة دون مسح السابق
   const handleAutoFill = (denom: number) => {
     if (targetValueNew === 0) return;
     
@@ -113,7 +122,6 @@ const ConverterCard: React.FC = () => {
     }
   };
 
-  // منطق التعديل اليدوي: يمنع تجاوز الإجمالي
   const handleCountChange = (denom: number, requestedCount: number) => {
     if (targetValueNew === 0) {
       setWallet(prev => ({ ...prev, [denom]: requestedCount }));
@@ -147,7 +155,7 @@ const ConverterCard: React.FC = () => {
   return (
     <div className="space-y-8 animate-in">
       {/* Mode Switcher */}
-      <div className="flex items-center justify-between bg-slate-50 p-3 rounded-2xl border border-slate-100">
+      <div className="flex items-center justify-between bg-slate-50 p-3 rounded-2xl border border-slate-100 shadow-inner">
         <div className="text-right">
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">اتجاة التحويل الحالي</p>
           <p className="text-base font-black text-slate-800">
@@ -169,11 +177,15 @@ const ConverterCard: React.FC = () => {
         <label className="block text-slate-400 text-[10px] font-bold mb-2 pr-2 uppercase tracking-[0.3em]">المبلغ المطلوب تحويله</label>
         <div className="relative">
           <input
-            type="number"
+            type="text"
+            inputMode="numeric"
             value={inputValue}
             onChange={(e) => {
-              setInputValue(e.target.value);
-              setWallet({}); 
+              const raw = e.target.value.replace(/,/g, '');
+              if (/^\d*$/.test(raw)) {
+                setInputValue(formatNumber(raw));
+                setWallet({});
+              }
             }}
             placeholder="٠"
             className="w-full text-5xl font-black py-7 px-8 rounded-[2.5rem] border-2 border-slate-100 focus:border-emerald-500 focus:ring-8 focus:ring-emerald-50 outline-none transition-all placeholder:text-slate-100 pr-12 text-right"

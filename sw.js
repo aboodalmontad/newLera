@@ -1,4 +1,4 @@
-const CACHE_NAME = 'syrian-lira-pwa-v3';
+const CACHE_NAME = 'syrian-lira-pwa-v6';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -9,13 +9,15 @@ const ASSETS_TO_CACHE = [
   './manifest.json',
   './components/ConverterCard.tsx',
   'https://cdn.tailwindcss.com',
-  'https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap'
+  'https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap',
+  'https://esm.sh/react@^19.2.3',
+  'https://esm.sh/react-dom@^19.2.3/'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Caching assets for offline use');
+      console.log('Caching assets for clean offline support');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
@@ -39,7 +41,7 @@ self.addEventListener('fetch', (event) => {
       if (cachedResponse) return cachedResponse;
       
       return fetch(event.request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+        if (!networkResponse || networkResponse.status !== 200) {
           return networkResponse;
         }
         
