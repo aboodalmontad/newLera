@@ -1,4 +1,4 @@
-const CACHE_NAME = 'syrian-lira-offline-v7';
+const CACHE_NAME = 'syrian-lira-offline-v8';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -11,7 +11,8 @@ const ASSETS_TO_CACHE = [
   'https://cdn.tailwindcss.com',
   'https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap',
   'https://esm.sh/react@^19.2.3',
-  'https://esm.sh/react-dom@^19.2.3/'
+  'https://esm.sh/react-dom@^19.2.3/',
+  'https://fonts.gstatic.com/s/tajawal/v11/I8at66J967162_3fW96o.woff2'
 ];
 
 self.addEventListener('install', (event) => {
@@ -38,7 +39,6 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      // إرجاع الملف من الذاكرة إذا وجد، وإلا جلبه من الشبكة
       if (cachedResponse) return cachedResponse;
       
       return fetch(event.request).then((networkResponse) => {
@@ -53,7 +53,6 @@ self.addEventListener('fetch', (event) => {
         
         return networkResponse;
       }).catch(() => {
-        // إذا فشل كل شيء وكان المستخدم يحاول فتح الصفحة الرئيسية، نعرض index.html المخزنة
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }
