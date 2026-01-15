@@ -25,20 +25,19 @@ interface BanknoteProps {
   value: number;
   count: number;
   onCountChange: (newCount: number) => void;
+  onAutoFill: () => void;
   disabled: boolean;
-  canAdd: boolean;
 }
 
-const Banknote: React.FC<BanknoteProps> = ({ value, count, onCountChange, disabled, canAdd }) => {
+const Banknote: React.FC<BanknoteProps> = ({ value, count, onCountChange, onAutoFill, disabled }) => {
   const info = DENOM_INFO[value];
 
   return (
     <div 
-      onClick={() => !disabled && canAdd && onCountChange(count + 1)}
+      onClick={() => !disabled && onAutoFill()}
       className={`relative overflow-hidden rounded-[2rem] border-2 ${info.border} ${info.bg} p-5
       shadow-sm transition-all duration-300 
-      ${!disabled && canAdd ? 'cursor-pointer hover:shadow-xl active:scale-95' : 'cursor-default'} 
-      ${disabled ? 'opacity-40 grayscale-[0.3]' : 'opacity-100'}
+      ${!disabled ? 'cursor-pointer hover:shadow-xl active:scale-95' : 'cursor-default opacity-40 grayscale-[0.3]'} 
       group flex flex-col justify-between aspect-[1.5/1] select-none`}
     >
       <div className="flex justify-between items-start">
@@ -98,6 +97,23 @@ const ConverterCard: React.FC = () => {
     return mode === ConversionMode.OLD_TO_NEW ? val / 100 : val * 100;
   }, [inputValue, mode]);
 
+  // منطق الملء التلقائي المطور: يكمل المبلغ المتبقي باستخدام هذه الفئة دون مسح السابق
+  const handleAutoFill = (denom: number) => {
+    if (targetValueNew === 0) return;
+    
+    const remaining = targetValueNew - walletTotal;
+    if (remaining <= 0) return;
+
+    const addedCount = Math.floor(remaining / denom);
+    if (addedCount > 0) {
+      setWallet(prev => ({
+        ...prev,
+        [denom]: (prev[denom] || 0) + addedCount
+      }));
+    }
+  };
+
+  // منطق التعديل اليدوي: يمنع تجاوز الإجمالي
   const handleCountChange = (denom: number, requestedCount: number) => {
     if (targetValueNew === 0) {
       setWallet(prev => ({ ...prev, [denom]: requestedCount }));
@@ -107,7 +123,7 @@ const ConverterCard: React.FC = () => {
     const otherTotal = Object.entries(wallet).reduce((acc: number, [d, c]) => {
       const dNum = Number(d);
       if (dNum === denom) return acc;
-      return acc + (dNum * (c as number || 0));
+      return acc + (dNum * (Number(c) || 0));
     }, 0);
 
     const maxAllowed = Math.floor((targetValueNew - otherTotal) / denom);
@@ -215,7 +231,7 @@ const ConverterCard: React.FC = () => {
                 ></div>
               </div>
               <div className="flex justify-between items-end font-black">
-                <div className={`text-3xl leading-none ${isComplete ? 'text-emerald-600' : 'text-slate-700'}`}>
+                <div className={`text-4xl leading-none ${isComplete ? 'text-emerald-600' : 'text-slate-700'}`}>
                   {walletTotal.toLocaleString()}
                   <span className="text-sm text-slate-400 font-bold mx-2">/ {targetValueNew.toLocaleString()}</span>
                 </div>
@@ -230,6 +246,8 @@ const ConverterCard: React.FC = () => {
           </div>
         )}
 
+        <p className="text-center text-slate-400 text-[9px] font-black uppercase tracking-[0.2em]">انقر لإكمال المبلغ بهذه الفئة، أو عدّل العدد يدوياً</p>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {NEW_DENOMINATIONS.map(denom => (
             <Banknote 
@@ -237,8 +255,8 @@ const ConverterCard: React.FC = () => {
               value={denom} 
               count={wallet[denom] || 0}
               onCountChange={(newCount) => handleCountChange(denom, newCount)}
-              disabled={targetValueNew > 0 && walletTotal >= targetValueNew && !wallet[denom]}
-              canAdd={targetValueNew === 0 || (walletTotal + denom <= targetValueNew)}
+              onAutoFill={() => handleAutoFill(denom)}
+              disabled={targetValueNew === 0}
             />
           ))}
         </div>
