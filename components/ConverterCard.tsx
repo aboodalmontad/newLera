@@ -105,8 +105,9 @@ const ConverterCard: React.FC = () => {
     }
 
     const otherTotal = Object.entries(wallet).reduce((acc: number, [d, c]) => {
-      if (Number(d) === denom) return acc;
-      return acc + (Number(d) * (c as number || 0));
+      const dNum = Number(d);
+      if (dNum === denom) return acc;
+      return acc + (dNum * (c as number || 0));
     }, 0);
 
     const maxAllowed = Math.floor((targetValueNew - otherTotal) / denom);
@@ -191,7 +192,7 @@ const ConverterCard: React.FC = () => {
       {/* Progress & Denomination Grid */}
       <div className="space-y-6 pt-6 border-t border-slate-100">
         {targetValueNew > 0 && (
-          <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 space-y-4">
+          <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 space-y-5">
             <div className="flex justify-between items-center">
               <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                 <span className="text-lg">📦</span> تجميع المبلغ
@@ -206,21 +207,24 @@ const ConverterCard: React.FC = () => {
               )}
             </div>
             
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="w-full h-4 bg-slate-200 rounded-full overflow-hidden shadow-inner">
                 <div 
                   className={`h-full transition-all duration-700 ${isComplete ? 'bg-emerald-500' : 'bg-emerald-400 animate-pulse'}`}
                   style={{ width: `${Math.min(progressPercentage, 100)}%` }}
                 ></div>
               </div>
-              <div className="flex justify-between text-[10px] font-black">
-                <span className={isComplete ? 'text-emerald-600' : 'text-slate-400'}>
-                  {walletTotal.toLocaleString()} / {targetValueNew.toLocaleString()}
-                </span>
-                {!isComplete && (
-                  <span className="text-amber-500">المتبقي: {(targetValueNew - walletTotal).toLocaleString()}</span>
-                )}
-                {isComplete && <span className="text-emerald-600">اكتمل التجميع بنجاح ✅</span>}
+              <div className="flex justify-between items-end font-black">
+                <div className={`text-3xl leading-none ${isComplete ? 'text-emerald-600' : 'text-slate-700'}`}>
+                  {walletTotal.toLocaleString()}
+                  <span className="text-sm text-slate-400 font-bold mx-2">/ {targetValueNew.toLocaleString()}</span>
+                </div>
+                <div className="flex flex-col items-end">
+                  {!isComplete && (
+                    <span className="text-xs text-amber-500 mb-1">المتبقي: {(targetValueNew - walletTotal).toLocaleString()}</span>
+                  )}
+                  {isComplete && <span className="text-xs text-emerald-600 mb-1 font-bold">اكتمل التجميع بنجاح ✅</span>}
+                </div>
               </div>
             </div>
           </div>
