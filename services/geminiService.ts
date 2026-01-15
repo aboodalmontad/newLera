@@ -9,6 +9,11 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
  * the 2026 Syrian currency redenomination.
  */
 export async function askGemini(message: string): Promise<string> {
+  // التحقق من حالة الاتصال بالإنترنت
+  if (!navigator.onLine) {
+    return "عذراً، أنت الآن غير متصل بالإنترنت. المساعد الذكي يحتاج للإنترنت للإجابة، لكن المحوّل الأساسي وجامع الفئات يعملان بشكل كامل بدون إنترنت.";
+  }
+
   try {
     // Using gemini-3-flash-preview for general task assistance
     const response = await ai.models.generateContent({

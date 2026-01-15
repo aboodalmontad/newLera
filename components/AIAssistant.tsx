@@ -4,12 +4,27 @@ import { askGemini } from '../services/geminiService';
 
 const AIAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant', text: string }[]>([
     { role: 'assistant', text: 'مرحباً بك! أنا مساعدك الذكي. كيف يمكنني مساعدتك اليوم في فهم التحويل الجديد لليرة؟' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // متابعة حالة الإنترنت
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Keep chat scrolled to bottom
   useEffect(() => {
@@ -36,9 +51,15 @@ const AIAssistant: React.FC = () => {
       {isOpen && (
         <div className="mb-4 w-80 md:w-96 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col h-[500px] animate-in slide-in-from-bottom-5 duration-300">
           <div className="bg-emerald-600 p-4 text-white flex justify-between items-center shadow-sm">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">🇸🇾</span>
-              <span className="font-bold text-sm">المساعد الذكي</span>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🇸🇾</span>
+                <span className="font-bold text-sm">المساعد الذكي</span>
+              </div>
+              <div className="flex items-center gap-1 mt-1">
+                <div className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-green-400' : 'bg-red-400'}`}></div>
+                <span className="text-[10px] opacity-80">{isOnline ? 'متصل' : 'أوفلاين - يعمل كدليل فقط'}</span>
+              </div>
             </div>
             <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 rounded-full p-1 transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -68,6 +89,13 @@ const AIAssistant: React.FC = () => {
                 </div>
               </div>
             )}
+            {!isOnline && messages.length > 0 && (
+              <div className="text-center py-2">
+                <span className="bg-red-50 text-red-500 text-[10px] px-3 py-1 rounded-full font-bold border border-red-100">
+                  ⚠️ المساعد الذكي محدود الوظائف حالياً لعدم وجود إنترنت
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="p-4 bg-white border-t border-slate-50">
@@ -77,13 +105,14 @@ const AIAssistant: React.FC = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="اسأل عن فئة الـ 500..."
-                className="flex-1 bg-slate-100 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none text-right"
+                placeholder={isOnline ? "اسأل عن فئة الـ 500..." : "المحادثة معطلة بدون إنترنت..."}
+                disabled={!isOnline}
+                className="flex-1 bg-slate-100 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none text-right disabled:opacity-50"
                 dir="rtl"
               />
               <button 
                 onClick={handleSend}
-                disabled={isLoading || !input.trim()}
+                disabled={isLoading || !input.trim() || !isOnline}
                 className="p-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:opacity-50 transition-all shadow-md active:scale-90"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 rotate-180" viewBox="0 0 20 20" fill="currentColor">
@@ -97,8 +126,11 @@ const AIAssistant: React.FC = () => {
 
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-14 h-14 bg-emerald-600 text-white rounded-full shadow-[0_10px_40px_rgba(5,150,105,0.4)] flex items-center justify-center hover:bg-emerald-700 hover:scale-110 active:scale-95 transition-all duration-300"
+        className="w-14 h-14 bg-emerald-600 text-white rounded-full shadow-[0_10px_40px_rgba(5,150,105,0.4)] flex items-center justify-center hover:bg-emerald-700 hover:scale-110 active:scale-95 transition-all duration-300 relative"
       >
+        {!isOnline && (
+           <div className="absolute top-0 right-0 w-4 h-4 bg-red-500 border-2 border-white rounded-full"></div>
+        )}
         {isOpen ? (
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
