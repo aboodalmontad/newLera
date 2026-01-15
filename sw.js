@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'syrian-lira-v1';
+const CACHE_NAME = 'syrian-lira-v2026';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -7,6 +7,7 @@ const ASSETS_TO_CACHE = [
   './App.tsx',
   './types.ts',
   './metadata.json',
+  './manifest.json',
   './components/ConverterCard.tsx',
   './components/AIAssistant.tsx',
   './services/geminiService.ts',
@@ -14,42 +15,50 @@ const ASSETS_TO_CACHE = [
   'https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap'
 ];
 
-// تثبيت الـ Service Worker وحفظ الملفات الأساسية
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
+  self.skipWaiting();
 });
 
-// تفعيل الـ Service Worker وحذف النسخ القديمة
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
-          }
-        })
-      );
+    caches.keys().then((keys) => {
+      return Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)));
     })
   );
+  self.clients.claim();
 });
 
-// استراتيجية "Cache First" مع التحديث في الخلفية للمكتبات الخارجية
 self.addEventListener('fetch', (event) => {
+  // لا نقوم بتخزين طلبات الـ API الخاصة بجوجل لأنها تحتاج إنترنت دائماً
+  if (event.request.url.includes('generativelanguage.googleapis.com')) {
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request).then((fetchResponse) => {
-        return caches.open(CACHE_NAME).then((cache) => {
-          // نقوم بتخزين الاستجابات الجديدة (مثل ملفات esm.sh) لاستخدامها لاحقاً بدون إنترنت
-          if (event.request.url.startsWith('http')) {
-            cache.put(event.request, fetchResponse.clone());
-          }
-          return fetchResponse;
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) return cachedResponse;
+      
+      return fetch(event.request).then((networkResponse) => {
+        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+          return networkResponse;
+        }
+        
+        const responseToCache = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseToCache);
         });
+        
+        return networkResponse;
+      }).catch(() => {
+        // إذا فشل الشبكة ولم يكن في الكاش، نعيد الصفحة الرئيسية إذا كان الطلب ملاحة (Navigation)
+        if (event.request.mode === 'navigate') {
+          return caches.match('./index.html');
+        }
       });
     })
   );

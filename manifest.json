@@ -1,0 +1,18 @@
+
+{
+  "short_name": "محوّل الليرة",
+  "name": "محوّل الليرة السورية الجديد ٢٠٢٦",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2489/2489756.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#fcfcfc",
+  "display": "standalone",
+  "theme_color": "#059669",
+  "description": "تطبيق لتحويل العملة السورية وحساب الفئات الجديدة لعام ٢٠٢٦ بدون إنترنت."
+}
