@@ -45,7 +45,7 @@ const App: React.FC = () => {
         <div className="flex flex-col items-center gap-3">
            <div className="flex flex-col items-center gap-1">
              <p className="font-black uppercase tracking-[0.3em] text-slate-400">تطبيق وطني خدمي سريع &bull; ٢٠٢٦</p>
-             <p className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100/50">جاهز للعمل بالكامل بدون إنترنت ✅</p>
+             <p className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100/50">يعمل بالكامل بدون إنترنت ✅</p>
            </div>
            
            <div className="pt-6 border-t border-slate-100 w-48 flex flex-col items-center gap-2">
