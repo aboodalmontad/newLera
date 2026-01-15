@@ -1,21 +1,19 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-// Always use new GoogleGenAI({ apiKey: process.env.API_KEY }) as per guidelines
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 /**
  * Interacts with Gemini 3 Flash model to provide context-aware help regarding 
  * the 2026 Syrian currency redenomination.
  */
 export async function askGemini(message: string): Promise<string> {
-  // التحقق من حالة الاتصال بالإنترنت
   if (!navigator.onLine) {
     return "عذراً، أنت الآن غير متصل بالإنترنت. المساعد الذكي يحتاج للإنترنت للإجابة، لكن المحوّل الأساسي وجامع الفئات يعملان بشكل كامل بدون إنترنت.";
   }
 
+  // إنشاء النسخة عند الطلب لضمان استخدام أحدث مفتاح API من البيئة
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
   try {
-    // Using gemini-3-flash-preview for general task assistance
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: message,
@@ -28,7 +26,6 @@ export async function askGemini(message: string): Promise<string> {
       },
     });
 
-    // Directly access the .text property of GenerateContentResponse (do not use text())
     return response.text || "عذراً، لم أتمكن من الحصول على رد مناسب.";
   } catch (error) {
     console.error("Gemini API error:", error);
