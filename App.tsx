@@ -18,13 +18,26 @@ const App: React.FC = () => {
   const [isOfflineReady, setIsOfflineReady] = useState(false);
 
   useEffect(() => {
-    // التحقق من حالة الـ Service Worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then(() => {
-        // بمجرد أن يصبح الـ SW جاهزاً، ننتظر قليلاً للتأكد من انتهاء التخزين
-        setTimeout(() => setIsOfflineReady(true), 2000);
-      });
-    }
+    const checkServiceWorker = () => {
+      if ('serviceWorker' in navigator) {
+        // إذا كان هناك متحكم نشط بالفعل، فالتطبيق جاهز
+        if (navigator.serviceWorker.controller) {
+          setIsOfflineReady(true);
+        } else {
+          // وإلا ننتظر حتى يصبح جاهزاً
+          navigator.serviceWorker.ready.then(() => {
+            setIsOfflineReady(true);
+          });
+        }
+      }
+    };
+
+    checkServiceWorker();
+    
+    // في حال تم تحديث الـ SW في الخلفية
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      setIsOfflineReady(true);
+    });
   }, []);
 
   return (
