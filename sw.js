@@ -1,5 +1,4 @@
-
-const CACHE_NAME = 'syrian-lira-v2026-v2';
+const CACHE_NAME = 'syrian-lira-pwa-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -10,12 +9,13 @@ const ASSETS_TO_CACHE = [
   './manifest.json',
   './components/ConverterCard.tsx',
   'https://cdn.tailwindcss.com',
-  'https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap'
+  'https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
+      console.log('Caching assets for offline use');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
@@ -25,7 +25,9 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
-      return Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)));
+      return Promise.all(
+        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+      );
     })
   );
   self.clients.claim();
