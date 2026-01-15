@@ -1,24 +1,31 @@
-const CACHE_NAME = 'syrian-lira-v2026-v3';
+const CACHE_NAME = 'syrian-lira-full-offline-v4';
 
-// الملفات الأساسية فقط لضمان نجاح التخزين الأول
+// يجب إضافة كافة الملفات المصدرية لضمان عمل التطبيق أوفلاين
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
+  './index.tsx',
+  './App.tsx',
+  './types.ts',
   './manifest.json',
+  './services/geminiService.ts',
+  './components/ConverterCard.tsx',
+  './components/AIAssistant.tsx',
   'https://cdn.tailwindcss.com',
   'https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap',
   'https://esm.sh/react@19.0.0',
   'https://esm.sh/react-dom@19.0.0',
-  'https://esm.sh/react-dom@19.0.0/client'
+  'https://esm.sh/react-dom@19.0.0/client',
+  'https://esm.sh/@google/genai@^1.36.0'
 ];
 
 self.addEventListener('install', (event) => {
-  self.skipWaiting(); // التفعيل الفوري للنسخة الجديدة
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return Promise.allSettled(
         ASSETS_TO_CACHE.map(url => 
-          cache.add(url).catch(err => console.log(`Skipped: ${url}`))
+          cache.add(url).catch(err => console.warn(`فشل تخزين: ${url}`))
         )
       );
     })
@@ -28,7 +35,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     Promise.all([
-      self.clients.claim(), // السيطرة الفورية على جميع الصفحات المفتوحة
+      self.clients.claim(),
       caches.keys().then((keys) => {
         return Promise.all(
           keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
@@ -40,8 +47,9 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      if (response) return response;
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) return cachedResponse;
+      
       return fetch(event.request).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {
           const responseToCache = networkResponse.clone();

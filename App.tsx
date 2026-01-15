@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ConverterCard from './components/ConverterCard';
+import AIAssistant from './components/AIAssistant';
 
 const SyrianFlag = () => (
   <svg viewBox="0 0 900 600" className="w-full h-full rounded-full shadow-md" xmlns="http://www.w3.org/2000/svg">
@@ -18,27 +19,24 @@ const App: React.FC = () => {
   const [isOfflineReady, setIsOfflineReady] = useState(false);
 
   useEffect(() => {
-    // 1. التحقق الفوري إذا كان الـ SW نشطاً
     if ('serviceWorker' in navigator) {
       if (navigator.serviceWorker.controller) {
         setIsOfflineReady(true);
       } else {
-        // 2. إذا لم يكن نشطاً، ننتظر الجاهزية
         navigator.serviceWorker.ready.then(() => {
           setIsOfflineReady(true);
         });
       }
 
-      // 3. مراقبة التغيير (للمرات القادمة)
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         setIsOfflineReady(true);
       });
     }
 
-    // 4. مؤقت أمان: إذا استغرق الأمر أكثر من 5 ثوانٍ، نعتبره جاهزاً (أو نفشل بهدوء)
+    // مؤقت أمان للتأكد من تحديث الحالة للمستخدم
     const safetyTimer = setTimeout(() => {
       setIsOfflineReady(true);
-    }, 5000);
+    }, 4000);
 
     return () => clearTimeout(safetyTimer);
   }, []);
@@ -92,6 +90,9 @@ const App: React.FC = () => {
            </div>
         </div>
       </footer>
+
+      {/* المساعد الذكي */}
+      <AIAssistant />
     </div>
   );
 };
