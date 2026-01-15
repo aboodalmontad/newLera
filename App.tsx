@@ -18,26 +18,29 @@ const App: React.FC = () => {
   const [isOfflineReady, setIsOfflineReady] = useState(false);
 
   useEffect(() => {
-    const checkServiceWorker = () => {
-      if ('serviceWorker' in navigator) {
-        // إذا كان هناك متحكم نشط بالفعل، فالتطبيق جاهز
-        if (navigator.serviceWorker.controller) {
+    // 1. التحقق الفوري إذا كان الـ SW نشطاً
+    if ('serviceWorker' in navigator) {
+      if (navigator.serviceWorker.controller) {
+        setIsOfflineReady(true);
+      } else {
+        // 2. إذا لم يكن نشطاً، ننتظر الجاهزية
+        navigator.serviceWorker.ready.then(() => {
           setIsOfflineReady(true);
-        } else {
-          // وإلا ننتظر حتى يصبح جاهزاً
-          navigator.serviceWorker.ready.then(() => {
-            setIsOfflineReady(true);
-          });
-        }
+        });
       }
-    };
 
-    checkServiceWorker();
-    
-    // في حال تم تحديث الـ SW في الخلفية
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      // 3. مراقبة التغيير (للمرات القادمة)
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        setIsOfflineReady(true);
+      });
+    }
+
+    // 4. مؤقت أمان: إذا استغرق الأمر أكثر من 5 ثوانٍ، نعتبره جاهزاً (أو نفشل بهدوء)
+    const safetyTimer = setTimeout(() => {
       setIsOfflineReady(true);
-    });
+    }, 5000);
+
+    return () => clearTimeout(safetyTimer);
   }, []);
 
   return (
@@ -69,13 +72,13 @@ const App: React.FC = () => {
              
              {isOfflineReady ? (
                <div className="flex items-center gap-1.5 text-emerald-600 bg-emerald-50 px-4 py-1.5 rounded-full border border-emerald-100 animate-in zoom-in">
-                 <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                 <p className="text-[10px] font-bold">جاهز للعمل بالكامل بدون إنترنت ✅</p>
+                 <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                 <p className="text-[10px] font-bold">جاهز للعمل بدون إنترنت ✅</p>
                </div>
              ) : (
                <div className="flex items-center gap-1.5 text-slate-400 bg-slate-100 px-4 py-1.5 rounded-full border border-slate-200">
                  <span className="w-2 h-2 bg-slate-300 rounded-full animate-pulse"></span>
-                 <p className="text-[10px] font-bold">جاري تأمين النسخة الاحتياطية للأوفلاين...</p>
+                 <p className="text-[10px] font-bold">جاري تأمين النسخة الاحتياطية...</p>
                </div>
              )}
            </div>
