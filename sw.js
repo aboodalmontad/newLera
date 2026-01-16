@@ -1,6 +1,5 @@
-const CACHE_NAME = 'syrian-lira-v2026-final';
+const CACHE_NAME = 'syrian-lira-v2026-ultra';
 
-// قائمة الموارد الأساسية - تأكد من مطابقة الروابط تماماً لما يتم طلبه
 const ASSETS = [
   './',
   './index.html',
@@ -16,17 +15,16 @@ const ASSETS = [
   'https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap'
 ];
 
-// 1. مرحلة التثبيت: تخزين كل شيء فوراً
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Installing Sovereign Cache...');
+      console.log('[SW] Ultra Precaching...');
       return cache.addAll(ASSETS);
-    }).then(() => self.skipWaiting())
+    })
   );
 });
 
-// 2. مرحلة التنشيط: حذف النسخ القديمة والسيطرة الفورية
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     Promise.all([
@@ -40,33 +38,26 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// 3. مرحلة جلب البيانات: الذكاء الحقيقي هنا
 self.addEventListener('fetch', (event) => {
-  // اعتراض طلبات التنقل (مثل فتح الموقع في تبويب جديد بدون إنترنت)
+  // إذا كان الطلب هو المتصفح نفسه (Navigation)
   if (event.request.mode === 'navigate') {
     event.respondWith(
       caches.match('./index.html').then((response) => {
         return response || fetch(event.request);
-      })
+      }).catch(() => caches.match('./index.html'))
     );
     return;
   }
 
-  // استراتيجية Cache First لكل شيء آخر
+  // استراتيجية Cache-First المطلقة للمكتبات والخطوط
   event.respondWith(
-    caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
-      if (cachedResponse) return cachedResponse;
-
-      return fetch(event.request).then((networkResponse) => {
-        // إذا كان الملف جديداً (مثل خط لم يُذكر في القائمة)، خزن نسخة منه
-        if (networkResponse && networkResponse.status === 200) {
-          const resClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, resClone));
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request).then((netRes) => {
+        if (netRes.ok) {
+          const clone = netRes.clone();
+          caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
         }
-        return networkResponse;
-      }).catch(() => {
-        // Fallback في حال انقطاع الإنترنت التام لملفات معينة
-        return new Response('Offline resource not found', { status: 404 });
+        return netRes;
       });
     })
   );
