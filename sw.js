@@ -1,33 +1,19 @@
-const CACHE_NAME = 'syrian-lira-full-offline-v4';
+const CACHE_NAME = 'syrian-lira-final-v5';
 
-// يجب إضافة كافة الملفات المصدرية لضمان عمل التطبيق أوفلاين
-const ASSETS_TO_CACHE = [
+// الملفات الأساسية التي يجب أن تتوفر للإقلاع الأولي
+const PRE_CACHE_RESOURCES = [
   './',
   './index.html',
-  './index.tsx',
-  './App.tsx',
-  './types.ts',
   './manifest.json',
-  './services/geminiService.ts',
-  './components/ConverterCard.tsx',
-  './components/AIAssistant.tsx',
   'https://cdn.tailwindcss.com',
-  'https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap',
-  'https://esm.sh/react@19.0.0',
-  'https://esm.sh/react-dom@19.0.0',
-  'https://esm.sh/react-dom@19.0.0/client',
-  'https://esm.sh/@google/genai@^1.36.0'
+  'https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap'
 ];
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return Promise.allSettled(
-        ASSETS_TO_CACHE.map(url => 
-          cache.add(url).catch(err => console.warn(`فشل تخزين: ${url}`))
-        )
-      );
+      return cache.addAll(PRE_CACHE_RESOURCES);
     })
   );
 });
@@ -46,19 +32,33 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // لا نقوم بتخزين طلبات الـ API الخاصة بـ Gemini لأنها تحتاج إنترنت دائماً
+  if (event.request.url.includes('generativelanguage.googleapis.com')) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) return cachedResponse;
-      
+      // إذا كان الملف موجوداً في الكاش، نرجعه فوراً (أسرع وأضمن أوفلاين)
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
+      // إذا لم يكن موجوداً، نجلبه من الشبكة ونخزنه للمرة القادمة
       return fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+        if (!networkResponse || networkResponse.status !== 200) {
+          return networkResponse;
         }
+
+        const responseToCache = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          // نقوم بتخزين الملفات المصدرية والتبعيات من esm.sh و tailwind
+          cache.put(event.request, responseToCache);
+        });
+
         return networkResponse;
       }).catch(() => {
+        // إذا فشل الاتصال بالكامل (أوفلاين) وكان الطلب لصفحة (Navigation)
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }

@@ -30,7 +30,18 @@
         from { opacity: 0; transform: translateY(15px); }
         to { opacity: 1; transform: translateY(0); }
       }
-      .delay-100 { animation-delay: 100ms; }
+      .loading-spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #059669;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
     </style>
   <script type="importmap">
 {
@@ -44,7 +55,16 @@
 </script>
 </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- واجهة تحميل أولية تظهر في حال تأخر الجافا سكريبت -->
+      <div id="initial-loader" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 20px;">
+        <div class="loading-spinner"></div>
+        <p style="color: #64748b; font-weight: bold; font-size: 14px;">جاري تشغيل النظام الوطني...</p>
+        <noscript>
+          <p style="color: #ef4444; font-weight: bold;">يرجى تفعيل الجافا سكريبت لتشغيل التطبيق.</p>
+        </noscript>
+      </div>
+    </div>
     <script type="module" src="./index.tsx"></script>
   </body>
 </html>
