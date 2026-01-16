@@ -1,7 +1,7 @@
-const CACHE_NAME = 'syrian-lira-pwa-v5';
+const CACHE_NAME = 'syrian-lira-v2026-final';
 
-// قائمة الموارد التي سيتم سحبها وتخزينها في جهاز المستخدم فوراً
-const PRE_CACHE_RESOURCES = [
+// قائمة الموارد الأساسية - تأكد من مطابقة الروابط تماماً لما يتم طلبه
+const ASSETS = [
   './',
   './index.html',
   './index.tsx',
@@ -16,63 +16,57 @@ const PRE_CACHE_RESOURCES = [
   'https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap'
 ];
 
-// مرحلة التثبيت: تحميل كل شيء وتخزينه في الجهاز
+// 1. مرحلة التثبيت: تخزين كل شيء فوراً
 self.addEventListener('install', (event) => {
-  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Building offline bunker...');
-      return Promise.allSettled(
-        PRE_CACHE_RESOURCES.map(url => 
-          fetch(url, { cache: 'reload' })
-            .then(res => {
-              if (res.ok) return cache.put(url, res);
-              throw new Error(`Critical asset failed: ${url}`);
-            })
-        )
-      );
-    })
+      console.log('[SW] Installing Sovereign Cache...');
+      return cache.addAll(ASSETS);
+    }).then(() => self.skipWaiting())
   );
 });
 
-// مرحلة التنشيط: مسح أي نسخ قديمة ومعطلة
+// 2. مرحلة التنشيط: حذف النسخ القديمة والسيطرة الفورية
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     Promise.all([
       self.clients.claim(),
       caches.keys().then((keys) => {
         return Promise.all(
-          keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+          keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
         );
       })
     ])
   );
 });
 
-// مرحلة الاستجابة: الرد من الجهاز (الذاكرة) أولاً دون محاولة الاتصال بالإنترنت
+// 3. مرحلة جلب البيانات: الذكاء الحقيقي هنا
 self.addEventListener('fetch', (event) => {
-  // لا نريد معالجة طلبات الـ API الخارجية إذا وجدت (مثل Gemini - ولكنها محذوفة حالياً)
-  if (event.request.url.includes('google')) return;
+  // اعتراض طلبات التنقل (مثل فتح الموقع في تبويب جديد بدون إنترنت)
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      caches.match('./index.html').then((response) => {
+        return response || fetch(event.request);
+      })
+    );
+    return;
+  }
 
+  // استراتيجية Cache First لكل شيء آخر
   event.respondWith(
     caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
-      // إذا كان الملف موجوداً في الجهاز، أرسله فوراً (سرعة فائقة + أوفلاين)
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      
-      // إذا لم يوجد (ملف جديد مثلاً)، جربه من الشبكة وخزنه للمرة القادمة
+      if (cachedResponse) return cachedResponse;
+
       return fetch(event.request).then((networkResponse) => {
+        // إذا كان الملف جديداً (مثل خط لم يُذكر في القائمة)، خزن نسخة منه
         if (networkResponse && networkResponse.status === 200) {
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+          const resClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, resClone));
         }
         return networkResponse;
       }).catch(() => {
-        // إذا انقطع الإنترنت تماماً ولم يجد الملف، ارجع للرئيسية
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
+        // Fallback في حال انقطاع الإنترنت التام لملفات معينة
+        return new Response('Offline resource not found', { status: 404 });
       });
     })
   );

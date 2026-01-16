@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>محوّل الليرة السورية الجديد ٢٠٢٦</title>
     <meta name="theme-color" content="#059669" />
-    <meta name="description" content="محوّل الليرة السورية المعتمد - يعمل بدون إنترنت تماماً." />
+    <meta name="description" content="محوّل الليرة السورية الجديد لحساب حذف الصفرين. يعمل بدون إنترنت تماماً." />
     <link rel="manifest" href="./manifest.json" />
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2489/2489756.png" />
     
@@ -24,14 +24,13 @@
         border: 3px solid #f3f3f3;
         border-top: 3px solid #059669;
         border-radius: 50%;
-        width: 24px;
-        height: 24px;
+        width: 32px;
+        height: 32px;
         animation: spin 1s linear infinite;
       }
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      .animate-fade { animation: fadeIn 0.5s ease-out forwards; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 
     <script type="importmap">
@@ -48,9 +47,12 @@
   </head>
   <body>
     <div id="root">
-      <div id="initial-loader" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 20px;">
+      <div id="initial-loader" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 24px; background: #fcfcfc;">
         <div class="loading-spinner"></div>
-        <p style="color: #64748b; font-weight: bold; font-size: 14px;">جاري تحميل النظام المحلي...</p>
+        <div style="text-align: center;">
+           <p style="color: #1e293b; font-weight: 900; font-size: 18px; margin-bottom: 8px;">محوّل الليرة السورية ٢٠٢٦</p>
+           <p style="color: #64748b; font-size: 12px;">جاري تفعيل وضع العمل دون إنترنت...</p>
+        </div>
       </div>
     </div>
     <script type="module" src="./index.tsx"></script>

@@ -2,25 +2,29 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
-// تسجيل وتفعيل الـ Service Worker بقوة
+// تفعيل الـ Service Worker بأكثر الطرق استقراراً
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => {
-        console.log('SW Registered');
-        // إجبار التحديث إذا وجد نسخة جديدة لضمان عدم بقاء المستخدم على نسخة معطلة
-        reg.onupdatefound = () => {
-          const installingWorker = reg.installing;
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then(registration => {
+        console.log('SW Status: Active');
+        
+        // التحقق من وجود تحديثات
+        registration.onupdatefound = () => {
+          const installingWorker = registration.installing;
           if (installingWorker) {
             installingWorker.onstatechange = () => {
               if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // هناك نسخة جديدة، قم بالتحديث التلقائي
                 window.location.reload();
               }
             };
           }
         };
       })
-      .catch(err => console.log('SW Registration failed', err));
+      .catch(error => {
+        console.error('SW Registration failed:', error);
+      });
   });
 }
 
