@@ -8,8 +8,13 @@
     <meta name="description" content="محوّل الليرة السورية الجديد لحساب حذف الصفرين. يعمل بدون إنترنت تماماً." />
     <link rel="manifest" href="./manifest.json" />
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2489/2489756.png" />
+    
+    <!-- تحميل Tailwind وتخزينه -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- الخطوط -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
     <style>
       body {
         font-family: 'Tajawal', sans-serif;
@@ -18,16 +23,11 @@
         overflow-x: hidden;
         user-select: none;
       }
-      input[type="number"]::-webkit-inner-spin-button,
-      input[type="number"]::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-      }
       .animate-in {
-        animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation: fadeIn 0.4s ease-out forwards;
       }
       @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(15px); }
+        from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
       }
       .loading-spinner {
@@ -43,24 +43,24 @@
         100% { transform: rotate(360deg); }
       }
     </style>
-  <script type="importmap">
+
+    <script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@19.0.0",
     "react-dom": "https://esm.sh/react-dom@19.0.0",
     "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.36.0"
+    "react/": "https://esm.sh/react@^19.2.3/"
   }
 }
 </script>
-</head>
+  </head>
   <body>
     <div id="root">
       <div id="initial-loader" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 20px;">
         <div class="loading-spinner"></div>
-        <p style="color: #64748b; font-weight: bold; font-size: 14px;">جاري تشغيل النظام الوطني (أوفلاين)...</p>
+        <p style="color: #64748b; font-weight: bold; font-size: 14px;">جاري تشغيل النظام الوطني المستقل...</p>
       </div>
     </div>
     <script type="module" src="./index.tsx"></script>

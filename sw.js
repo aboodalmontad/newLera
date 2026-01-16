@@ -1,7 +1,7 @@
-const CACHE_NAME = 'syrian-lira-ultra-v2';
+const CACHE_NAME = 'lira-safe-v1';
 
-// قائمة الموارد الإجبارية للعمل بدون إنترنت
-const MANDATORY_ASSETS = [
+// قائمة الموارد الحيوية - يجب أن تكون الروابط مطابقة تماماً لما في index.html
+const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './index.tsx',
@@ -17,18 +17,17 @@ const MANDATORY_ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
+  // تفعيل الـ SW فوراً دون انتظار إغلاق التبويبات المفتوحة
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      // تحميل كافة الموارد دفعة واحدة
-      return Promise.all(
-        MANDATORY_ASSETS.map(url => 
-          fetch(url, { cache: 'reload' })
-            .then(response => {
-              if (response.ok) return cache.put(url, response);
-              throw new Error(`Failed to fetch ${url}`);
-            })
-            .catch(err => console.warn('Pre-cache error:', url, err))
+      console.log('Precaching vital assets...');
+      return Promise.allSettled(
+        ASSETS_TO_CACHE.map(url => 
+          fetch(url, { cache: 'reload' }).then(response => {
+            if (response.ok) return cache.put(url, response);
+            throw new Error(`Failed to cache ${url}`);
+          })
         )
       );
     })
@@ -49,23 +48,27 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // استراتيجية: ابحث في الكاش أولاً، إذا لم تجد اذهب للشبكة
+  // استراتيجية: ابحث في الكاش أولاً (Cache First)
   event.respondWith(
-    caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+    caches.match(event.request, { ignoreSearch: true }).then((response) => {
+      // إذا وجد المورد في الكاش، أرجعه فوراً
+      if (response) return response;
+      
+      // إذا لم يوجد، حاول جلبه من الشبكة
       return fetch(event.request).then((networkResponse) => {
-        // تخزين الطلبات الجديدة تلقائياً (مثل الخطوط أو الأيقونات)
-        if (networkResponse && networkResponse.status === 200) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic' && networkResponse.type !== 'cors') {
+          return networkResponse;
         }
+        
+        // قم بتخزين النسخة الجديدة للاستخدام القادم
+        const responseToCache = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseToCache);
+        });
+        
         return networkResponse;
       }).catch(() => {
-        // إذا انقطع الإنترنت تماماً ولم يجد الملف في الكاش
+        // إذا فشل الإنترنت ولم يجد المورد، ارجع للصفحة الرئيسية
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }
