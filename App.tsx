@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import ConverterCard from './components/ConverterCard';
-import AIAssistant from './components/AIAssistant';
 
 const SyrianFlag = () => (
   <svg viewBox="0 0 900 600" className="w-full h-full rounded-full shadow-md" xmlns="http://www.w3.org/2000/svg">
@@ -19,20 +18,18 @@ const App: React.FC = () => {
   const [isOfflineReady, setIsOfflineReady] = useState(false);
 
   useEffect(() => {
-    // محاولة "لمس" كافة الملفات لضمان دخولها في الكاش
+    // محاولة تخزين الملفات الأساسية في الكاش لضمان الأوفلاين
     const prefetchAssets = async () => {
       const assets = [
         './index.tsx',
         './App.tsx',
         './components/ConverterCard.tsx',
-        './components/AIAssistant.tsx',
-        './types.ts',
-        './services/geminiService.ts'
+        './types.ts'
       ];
       try {
         await Promise.all(assets.map(asset => fetch(asset, { priority: 'low' })));
       } catch (e) {
-        console.log('Prefetch failed, likely offline already.');
+        console.log('Offline mode active.');
       }
     };
 
@@ -42,14 +39,10 @@ const App: React.FC = () => {
       navigator.serviceWorker.ready.then(() => {
         setIsOfflineReady(true);
       });
-
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        window.location.reload(); // إعادة التحميل لتفعيل الـ SW الجديد فوراً
-      });
     }
 
-    // لضمان ظهور الرسالة حتى لو تأخر الـ SW
-    const timer = setTimeout(() => setIsOfflineReady(true), 5000);
+    // fallback لضمان ظهور الحالة
+    const timer = setTimeout(() => setIsOfflineReady(true), 3000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -102,8 +95,6 @@ const App: React.FC = () => {
            </div>
         </div>
       </footer>
-
-      <AIAssistant />
     </div>
   );
 };
