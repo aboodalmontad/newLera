@@ -18,15 +18,18 @@ const App: React.FC = () => {
   const [offlineStatus, setOfflineStatus] = useState<'loading' | 'ready'>('loading');
 
   useEffect(() => {
-    const checkSW = () => {
+    const checkStatus = () => {
       if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         setOfflineStatus('ready');
       }
     };
 
-    checkSW();
-    const interval = setInterval(checkSW, 1000);
-    const timeout = setTimeout(() => setOfflineStatus('ready'), 4000);
+    // فحص أولي
+    checkStatus();
+
+    // فحص دوري حتى تكتمل عملية التخزين
+    const interval = setInterval(checkStatus, 500);
+    const timeout = setTimeout(() => setOfflineStatus('ready'), 3000);
 
     return () => {
       clearInterval(interval);
@@ -37,46 +40,46 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#fcfcfc] flex flex-col items-center py-8 px-4 md:py-16 select-none overflow-x-hidden">
       <header className="w-full max-w-2xl text-center mb-12 animate-fade">
-        <div className="inline-flex items-center justify-center w-24 h-24 bg-white rounded-full mb-8 border border-slate-100 shadow-xl p-1.5 transition-all hover:scale-110">
+        <div className="inline-flex items-center justify-center w-20 h-20 md:w-24 md:h-24 bg-white rounded-full mb-6 md:mb-8 border border-slate-100 shadow-xl p-1.5 transition-all hover:scale-110">
            <SyrianFlag />
         </div>
-        <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-4 tracking-tight">
+        <h1 className="text-3xl md:text-6xl font-black text-slate-900 mb-4 tracking-tight px-2">
           محوّل الليرة السورية
         </h1>
         <div className="flex items-center justify-center gap-3">
-          <span className="h-[2px] w-10 bg-emerald-500 rounded-full opacity-20"></span>
-          <p className="text-slate-500 font-bold tracking-wide text-sm md:text-base">الإصدار السيادي المعتمد ٢٠٢٦</p>
-          <span className="h-[2px] w-10 bg-emerald-500 rounded-full opacity-20"></span>
+          <span className="h-[2px] w-8 md:w-10 bg-emerald-500 rounded-full opacity-20"></span>
+          <p className="text-slate-500 font-bold tracking-wide text-xs md:text-base">الإصدار المستقل المعتمد ٢٠٢٦</p>
+          <span className="h-[2px] w-8 md:w-10 bg-emerald-500 rounded-full opacity-20"></span>
         </div>
       </header>
 
-      <main className="w-full max-w-xl bg-white rounded-[3rem] shadow-[0_32px_80px_rgba(0,0,0,0.06)] overflow-hidden border border-slate-50 animate-fade" style={{animationDelay: '0.1s'}}>
-        <div className="p-6 md:p-12">
+      <main className="w-full max-w-xl bg-white rounded-[2.5rem] md:rounded-[3rem] shadow-[0_32px_80px_rgba(0,0,0,0.06)] overflow-hidden border border-slate-50 animate-fade" style={{animationDelay: '0.1s'}}>
+        <div className="p-5 md:p-12">
           <ConverterCard />
         </div>
       </main>
 
-      <footer className="mt-16 text-slate-400 text-xs text-center space-y-6 pb-16 opacity-90 animate-fade" style={{animationDelay: '0.2s'}}>
+      <footer className="mt-12 md:mt-16 text-slate-400 text-xs text-center space-y-6 pb-16 opacity-90 animate-fade" style={{animationDelay: '0.2s'}}>
         <div className="flex flex-col items-center gap-4">
            {offlineStatus === 'ready' ? (
-             <div className="flex items-center gap-2 text-emerald-700 bg-emerald-50 px-6 py-2.5 rounded-full border border-emerald-100 shadow-sm transition-all animate-fade">
+             <div className="flex items-center gap-2 text-emerald-700 bg-emerald-50/80 px-5 md:px-6 py-2 md:py-2.5 rounded-full border border-emerald-100 shadow-sm backdrop-blur-sm transition-all">
                <span className="relative flex h-2.5 w-2.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                </span>
-               <p className="text-[11px] font-black uppercase tracking-widest">مخزن محلياً: يعمل بدون إنترنت تماماً</p>
+               <p className="text-[10px] md:text-[11px] font-black uppercase tracking-widest">جاهز للعمل بدون إنترنت تماماً</p>
              </div>
            ) : (
-             <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-6 py-2.5 rounded-full border border-amber-100 transition-all">
+             <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-5 md:px-6 py-2 md:py-2.5 rounded-full border border-amber-100">
                <div className="w-3 h-3 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-               <p className="text-[11px] font-black tracking-widest uppercase">جاري تأمين النسخة المستقلة...</p>
+               <p className="text-[10px] md:text-[11px] font-black tracking-widest uppercase">جاري التخزين للاستخدام الأوفلاين...</p>
              </div>
            )}
            
-           <div className="pt-8 border-t border-slate-100 w-full max-w-[240px] flex flex-col items-center gap-3">
+           <div className="pt-6 border-t border-slate-100 w-full max-w-[200px] flex flex-col items-center gap-3">
              <div className="text-center">
                <p className="text-sm font-black text-slate-800 tracking-wide">هدية لسورية الحبيبة ❤️</p>
-               <p className="text-[10px] font-bold text-slate-400 mt-1.5 leading-relaxed">تطبيق وطني خدمي سريع<br/>المهندس عبد الرحمن نحوي</p>
+               <p className="text-[10px] font-bold text-slate-400 mt-1 leading-relaxed">المهندس عبد الرحمن نحوي</p>
              </div>
            </div>
         </div>
