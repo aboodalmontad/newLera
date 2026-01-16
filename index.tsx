@@ -2,28 +2,29 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
-// تفعيل الـ Service Worker بأكثر الطرق استقراراً
+// تسجيل الـ Service Worker بطريقة مباشرة لتجنب مشاكل المسارات المعقدة
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js', { scope: './' })
-      .then(registration => {
-        console.log('SW Status: Active');
+    // استخدام مسار نسبي مباشر بدلاً من constructor URL المعقد
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => {
+        console.log('SW: Registered with scope:', reg.scope);
         
-        // التحقق من وجود تحديثات
-        registration.onupdatefound = () => {
-          const installingWorker = registration.installing;
+        reg.onupdatefound = () => {
+          const installingWorker = reg.installing;
           if (installingWorker) {
             installingWorker.onstatechange = () => {
               if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // هناك نسخة جديدة، قم بالتحديث التلقائي
+                // تفعيل التحديث فوراً عند توفر نسخة جديدة
                 window.location.reload();
               }
             };
           }
         };
       })
-      .catch(error => {
-        console.error('SW Registration failed:', error);
+      .catch(err => {
+        // تجاهل أخطاء الأصل في بيئات المعاينة إذا كانت القيود صارمة
+        console.warn('SW: Registration failed (Normal in some preview environments):', err.message);
       });
   });
 }

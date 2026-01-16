@@ -25,24 +25,24 @@ const Banknote: React.FC<{ value: number; count: number; onCountChange: (v: numb
   return (
     <div 
       onClick={() => !disabled && onAutoFill()}
-      className={`relative overflow-hidden rounded-3xl border-2 ${info.border} ${info.bg} p-4 md:p-6 transition-all duration-300 ${!disabled ? 'cursor-pointer hover:shadow-lg active:scale-95' : 'opacity-40 grayscale-[0.3]'} group flex flex-col justify-between select-none min-h-[120px]`}
+      className={`relative overflow-hidden rounded-2xl border-2 ${info.border} ${info.bg} p-3 md:p-6 transition-all duration-300 ${!disabled ? 'cursor-pointer hover:shadow-md active:scale-95' : 'opacity-40 grayscale-[0.3]'} group flex flex-col justify-between select-none min-h-[100px] md:min-h-[120px]`}
     >
       <div className="flex justify-between items-start">
         <div className="flex flex-col">
-          <span className={`text-2xl md:text-3xl font-black ${info.text} leading-none`}>{value}</span>
-          <span className={`text-[8px] font-bold ${info.text} opacity-50 uppercase`}>جديدة</span>
+          <span className={`text-xl md:text-3xl font-black ${info.text} leading-none`}>{value}</span>
+          <span className={`text-[7px] md:text-[8px] font-bold ${info.text} opacity-50 uppercase`}>جديدة</span>
         </div>
-        <div className="text-3xl md:text-4xl filter drop-shadow-sm group-hover:scale-110 transition-transform">{info.icon}</div>
+        <div className="text-2xl md:text-4xl filter drop-shadow-sm group-hover:scale-110 transition-transform">{info.icon}</div>
       </div>
-      <div className="flex justify-between items-end gap-2 mt-2">
-        <div className={`text-[10px] font-bold ${info.text} opacity-60`}>{info.secondaryLabel}</div>
+      <div className="flex justify-between items-end gap-1 mt-1">
+        <div className={`text-[8px] md:text-[10px] font-bold ${info.text} opacity-60 truncate max-w-[50px] md:max-w-none`}>{info.secondaryLabel}</div>
         <input
           type="number"
           value={count || ''}
           onClick={(e) => e.stopPropagation()}
           onChange={(e) => onCountChange(parseInt(e.target.value) || 0)}
           placeholder="٠"
-          className={`w-14 h-10 md:w-16 md:h-12 bg-white/90 rounded-xl text-center text-lg font-black ${info.text} border border-black/5 outline-none`}
+          className={`w-10 h-8 md:w-16 md:h-12 bg-white/90 rounded-lg md:rounded-xl text-center text-sm md:text-lg font-black ${info.text} border border-black/5 outline-none`}
         />
       </div>
     </div>
@@ -70,24 +70,24 @@ const ConverterCard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 md:space-y-8 animate-fade">
+    <div className="space-y-4 md:space-y-8 animate-fade">
       {/* Switcher */}
-      <div className="flex items-center justify-between bg-slate-100/50 p-2 rounded-2xl border border-slate-200 shadow-inner">
-        <div className="pr-3">
-          <p className="text-[9px] text-slate-400 font-bold uppercase mb-0.5">النمط</p>
-          <p className="text-xs md:text-sm font-black text-slate-800">{mode === ConversionMode.OLD_TO_NEW ? 'من القديمة للجديدة' : 'من الجديدة للقديمة'}</p>
+      <div className="flex items-center justify-between bg-slate-100/50 p-1.5 md:p-2 rounded-xl md:rounded-2xl border border-slate-200 shadow-inner">
+        <div className="pr-2 md:pr-3">
+          <p className="text-[8px] md:text-[9px] text-slate-400 font-bold uppercase mb-0.5">النمط</p>
+          <p className="text-[10px] md:text-sm font-black text-slate-800">{mode === ConversionMode.OLD_TO_NEW ? 'من القديمة للجديدة' : 'من الجديدة للقديمة'}</p>
         </div>
-        <button onClick={() => {setMode(m => m === ConversionMode.OLD_TO_NEW ? ConversionMode.NEW_TO_OLD : ConversionMode.OLD_TO_NEW); setInputValue(''); setWallet({});}} className="p-3 bg-white rounded-xl shadow-sm text-emerald-600 hover:bg-emerald-50 active:scale-90 transition-all">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
+        <button onClick={() => {setMode(m => m === ConversionMode.OLD_TO_NEW ? ConversionMode.NEW_TO_OLD : ConversionMode.OLD_TO_NEW); setInputValue(''); setWallet({});}} className="p-2 md:p-3 bg-white rounded-lg md:rounded-xl shadow-sm text-emerald-600 hover:bg-emerald-50 active:scale-90 transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
         </button>
       </div>
 
       {/* Main Input */}
-      <div className="space-y-2">
-        <div className="flex justify-between items-center px-2">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">المبلغ المراد تحويله</label>
-          <span className={`px-2 py-1 rounded text-[9px] font-black ${mode === ConversionMode.OLD_TO_NEW ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
-            {mode === ConversionMode.OLD_TO_NEW ? 'بالعملة القديمة' : 'بالعملة الجديدة'}
+      <div className="space-y-1.5 md:space-y-2">
+        <div className="flex justify-between items-center px-1">
+          <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">المبلغ</label>
+          <span className={`px-1.5 py-0.5 rounded text-[8px] md:text-[9px] font-black ${mode === ConversionMode.OLD_TO_NEW ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+            {mode === ConversionMode.OLD_TO_NEW ? 'قديمة' : 'جديدة'}
           </span>
         </div>
         <div className="relative">
@@ -100,48 +100,48 @@ const ConverterCard: React.FC = () => {
               if (/^\d*$/.test(val)) setInputValue(val ? Number(val).toLocaleString() : '');
             }}
             placeholder="٠"
-            className="w-full text-4xl md:text-6xl font-black py-6 md:py-10 px-6 md:px-10 rounded-[2rem] md:rounded-[3rem] border-2 border-slate-100 focus:border-emerald-500 outline-none text-right shadow-sm transition-all"
+            className="w-full text-3xl md:text-6xl font-black py-4 md:py-10 px-4 md:px-10 rounded-2xl md:rounded-[3rem] border-2 border-slate-100 focus:border-emerald-500 outline-none text-right shadow-sm transition-all"
           />
         </div>
       </div>
 
       {/* Result Card */}
       {inputValue && (
-        <div className={`p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-xl text-white relative overflow-hidden transition-all ${mode === ConversionMode.OLD_TO_NEW ? 'bg-emerald-600' : 'bg-amber-500'}`}>
-          <p className="text-white/60 text-[10px] font-bold mb-2 uppercase">المبلغ المقابل:</p>
-          <div className="flex items-baseline flex-wrap gap-2">
-            <h2 className="text-4xl md:text-6xl font-black tabular-nums">{resultValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}</h2>
-            <span className="text-sm md:text-lg font-bold opacity-80">{mode === ConversionMode.OLD_TO_NEW ? 'ليرة جديدة' : 'ليرة قديمة'}</span>
+        <div className={`p-4 md:p-10 rounded-2xl md:rounded-[3rem] shadow-xl text-white relative overflow-hidden transition-all ${mode === ConversionMode.OLD_TO_NEW ? 'bg-emerald-600' : 'bg-amber-500'}`}>
+          <p className="text-white/60 text-[8px] md:text-[10px] font-bold mb-1 md:mb-2 uppercase">النتيجة:</p>
+          <div className="flex items-baseline flex-wrap gap-1 md:gap-2">
+            <h2 className="text-2xl md:text-6xl font-black tabular-nums">{resultValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}</h2>
+            <span className="text-[10px] md:text-lg font-bold opacity-80">{mode === ConversionMode.OLD_TO_NEW ? 'ليرة جديدة' : 'ليرة قديمة'}</span>
           </div>
         </div>
       )}
 
       {/* Progress & Grid */}
-      <div className="pt-6 border-t border-slate-100 space-y-6">
+      <div className="pt-4 md:pt-6 border-t border-slate-100 space-y-4 md:space-y-6">
         {targetValueNew > 0 && (
-          <div className="bg-slate-50 p-4 md:p-6 rounded-[2rem] border border-slate-200 space-y-4">
+          <div className="bg-slate-50 p-3 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-200 space-y-3 md:space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-[10px] font-black text-slate-500 uppercase">توزيع الفئات الجديدة</span>
-              <div className="h-1.5 w-24 bg-slate-200 rounded-full overflow-hidden">
+              <span className="text-[8px] md:text-[10px] font-black text-slate-500 uppercase">توزيع الفئات</span>
+              <div className="h-1 md:h-1.5 w-16 md:w-24 bg-slate-200 rounded-full overflow-hidden">
                 <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${Math.min(progressPercentage, 100)}%` }}></div>
               </div>
             </div>
             <div className="flex justify-between items-end">
                <div>
-                 <p className="text-[8px] text-slate-400 font-bold uppercase mb-1">المجموع الحالي</p>
-                 <p className={`text-2xl font-black ${isComplete ? 'text-emerald-600' : 'text-slate-800'}`}>{walletTotal.toLocaleString()}</p>
+                 <p className="text-[7px] md:text-[8px] text-slate-400 font-bold uppercase mb-0.5">المجموع</p>
+                 <p className={`text-lg md:text-2xl font-black ${isComplete ? 'text-emerald-600' : 'text-slate-800'}`}>{walletTotal.toLocaleString()}</p>
                </div>
                {!isComplete && (
                  <div className="text-left">
-                   <p className="text-[8px] text-amber-500 font-bold uppercase mb-1 text-left">المتبقي</p>
-                   <p className="text-xl font-black text-amber-600">{(targetValueNew - walletTotal).toLocaleString()}</p>
+                   <p className="text-[7px] md:text-[8px] text-amber-500 font-bold uppercase mb-0.5 text-left">المتبقي</p>
+                   <p className="text-base md:text-xl font-black text-amber-600">{(targetValueNew - walletTotal).toLocaleString()}</p>
                  </div>
                )}
             </div>
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 gap-2 md:gap-4">
           {NEW_DENOMINATIONS.map(d => (
             <Banknote key={d} value={d} count={wallet[d] || 0} onCountChange={(v) => {
               const other = Object.entries(wallet).reduce((a, [dn, c]) => Number(dn) === d ? a : a + (Number(dn) * (Number(c) || 0)), 0);
