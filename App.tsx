@@ -15,23 +15,34 @@ const SyrianFlag = () => (
 );
 
 const App: React.FC = () => {
-  const [offlineStatus, setOfflineStatus] = useState<'loading' | 'ready'>('loading');
+  const [offlineStatus, setOfflineStatus] = useState<'loading' | 'ready' | 'not-supported'>('loading');
 
   useEffect(() => {
-    const checkRegistration = async () => {
-      if ('serviceWorker' in navigator) {
+    const checkStatus = async () => {
+      if (!('serviceWorker' in navigator)) {
+        setOfflineStatus('not-supported');
+        return;
+      }
+
+      try {
+        // محاولة الحصول على التسجيل الحالي بأمان
         const registration = await navigator.serviceWorker.getRegistration();
         if (registration && registration.active) {
           setOfflineStatus('ready');
         }
+      } catch (e) {
+        // في حال فشل الوصول (بسبب خطأ Origin المذكور)، ننتقل لوضع "غير مدعوم" بدلاً من التعليق
+        setOfflineStatus('not-supported');
       }
     };
 
-    // فحص دوري كل ثانية حتى يتفعل الـ Service Worker
-    const interval = setInterval(checkRegistration, 1000);
+    // فحص دوري كل ثانية
+    const interval = setInterval(checkStatus, 1000);
     
-    // إذا لم ينجح خلال 5 ثواني، اعتبره جاهزاً بناءً على الكاش الأولي
-    const timeout = setTimeout(() => setOfflineStatus('ready'), 5000);
+    // مهلة زمنية قصيرة لضمان عدم بقاء المستخدم في حالة "التحميل" في بيئات المعاينة
+    const timeout = setTimeout(() => {
+      setOfflineStatus((prev) => prev === 'loading' ? 'not-supported' : prev);
+    }, 4000);
 
     return () => {
       clearInterval(interval);
@@ -71,17 +82,21 @@ const App: React.FC = () => {
                </span>
                <p className="text-[10px] md:text-[11px] font-black uppercase tracking-widest">جاهز للعمل بدون إنترنت (١٠٠٪)</p>
              </div>
-           ) : (
+           ) : offlineStatus === 'loading' ? (
              <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-5 md:px-6 py-2 md:py-2.5 rounded-full border border-amber-100">
                <div className="w-3 h-3 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-               <p className="text-[10px] md:text-[11px] font-black tracking-widest uppercase">جاري التثبيت للاستخدام الأوفلاين...</p>
+               <p className="text-[10px] md:text-[11px] font-black tracking-widest uppercase">جاري تهيئة وضع الأوفلاين...</p>
+             </div>
+           ) : (
+             <div className="flex items-center gap-2 text-slate-500 bg-slate-50 px-5 md:px-6 py-2 md:py-2.5 rounded-full border border-slate-100 opacity-60">
+               <p className="text-[10px] md:text-[11px] font-black tracking-widest uppercase">وضع العرض المباشر</p>
              </div>
            )}
            
            <div className="pt-6 border-t border-slate-100 w-full max-w-[200px] flex flex-col items-center gap-3">
              <div className="text-center">
                <p className="text-sm font-black text-slate-800 tracking-wide">هدية لسورية الحبيبة ❤️</p>
-               <p className="text-[10px] font-bold text-slate-400 mt-1 leading-relaxed">المهندس عبد الرحمن نحوي</p>
+               <p className="text-[10px] font-bold text-slate-400 mt-1 leading-relaxed">عبد الرحمن نحوي</p>
              </div>
            </div>
         </div>
