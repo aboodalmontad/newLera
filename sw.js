@@ -1,7 +1,7 @@
-const CACHE_NAME = 'syrian-lira-pwa-v3';
+const CACHE_NAME = 'syrian-lira-ultra-v4';
 
-// الموارد الأساسية التي يجب تخزينها فوراً
-const PRE_CACHE_ASSETS = [
+// قائمة الموارد الأساسية - يجب أن تتطابق الروابط تماماً مع ما في index.html
+const PRE_CACHE_RESOURCES = [
   './',
   './index.html',
   './index.tsx',
@@ -16,43 +16,35 @@ const PRE_CACHE_ASSETS = [
   'https://esm.sh/react-dom@19.0.0/client'
 ];
 
-// تثبيت الـ Service Worker وتخزين الملفات
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('SW: Pre-caching all assets');
-      // نستخدم Promise.allSettled لضمان عدم فشل التثبيت بالكامل إذا فشل ملف واحد
+      console.log('SW: Pre-caching critical assets');
       return Promise.allSettled(
-        PRE_CACHE_ASSETS.map(asset => 
-          cache.add(asset).catch(err => console.error(`Failed to cache ${asset}:`, err))
+        PRE_CACHE_RESOURCES.map(url => 
+          cache.add(url).catch(err => console.warn(`Failed to cache: ${url}`, err))
         )
       );
     })
   );
 });
 
-// تنظيف الكاش القديم عند التحديث
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     Promise.all([
       self.clients.claim(),
-      caches.keys().then((cacheNames) => {
+      caches.keys().then((keys) => {
         return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME) {
-              return caches.delete(cacheName);
-            }
-          })
+          keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
         );
       })
     ])
   );
 });
 
-// استراتيجية التحميل: الكاش أولاً، ثم الشبكة
 self.addEventListener('fetch', (event) => {
-  // استثناء لطلبات التصفح الأساسية (لضمان عمل index.html)
+  // للطلبات الملاحية (فتح الموقع)، حاول الشبكة أولاً ثم الكاش كبديل
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => caches.match('./index.html'))
@@ -60,16 +52,16 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // استراتيجية Cache-First: ابحث في الكاش أولاً
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      // إذا كان الملف موجوداً في الكاش، أرجعه فوراً
       if (cachedResponse) {
         return cachedResponse;
       }
 
-      // إذا لم يكن موجوداً، حاول جلبه من الشبكة وتخزينه للمرة القادمة
+      // إذا لم يكن في الكاش، جربه من الشبكة وخزنه ديناميكياً
       return fetch(event.request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200) {
+        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
           return networkResponse;
         }
 
@@ -80,10 +72,8 @@ self.addEventListener('fetch', (event) => {
 
         return networkResponse;
       }).catch(() => {
-        // إذا كان المستخدم أوفلاين والملف غير موجود بالكاش
-        if (event.request.url.match(/\.(png|jpg|jpeg|gif|svg)$/)) {
-          return new Response('', { status: 404 });
-        }
+        // إذا فشل الإنترنت ولم يكن الملف في الكاش
+        console.log('SW: Fetch failed and not in cache', event.request.url);
       });
     })
   );

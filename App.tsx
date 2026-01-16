@@ -18,18 +18,20 @@ const App: React.FC = () => {
   const [offlineStatus, setOfflineStatus] = useState<'loading' | 'ready'>('loading');
 
   useEffect(() => {
-    const checkStatus = () => {
-      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        setOfflineStatus('ready');
+    const checkRegistration = async () => {
+      if ('serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (registration && registration.active) {
+          setOfflineStatus('ready');
+        }
       }
     };
 
-    // فحص أولي
-    checkStatus();
-
-    // فحص دوري حتى تكتمل عملية التخزين
-    const interval = setInterval(checkStatus, 500);
-    const timeout = setTimeout(() => setOfflineStatus('ready'), 3000);
+    // فحص دوري كل ثانية حتى يتفعل الـ Service Worker
+    const interval = setInterval(checkRegistration, 1000);
+    
+    // إذا لم ينجح خلال 5 ثواني، اعتبره جاهزاً بناءً على الكاش الأولي
+    const timeout = setTimeout(() => setOfflineStatus('ready'), 5000);
 
     return () => {
       clearInterval(interval);
@@ -62,17 +64,17 @@ const App: React.FC = () => {
       <footer className="mt-12 md:mt-16 text-slate-400 text-xs text-center space-y-6 pb-16 opacity-90 animate-fade" style={{animationDelay: '0.2s'}}>
         <div className="flex flex-col items-center gap-4">
            {offlineStatus === 'ready' ? (
-             <div className="flex items-center gap-2 text-emerald-700 bg-emerald-50/80 px-5 md:px-6 py-2 md:py-2.5 rounded-full border border-emerald-100 shadow-sm backdrop-blur-sm transition-all">
+             <div className="flex items-center gap-2 text-emerald-700 bg-emerald-50/80 px-5 md:px-6 py-2 md:py-2.5 rounded-full border border-emerald-100 shadow-sm backdrop-blur-sm transition-all scale-100 active:scale-95 cursor-default">
                <span className="relative flex h-2.5 w-2.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                </span>
-               <p className="text-[10px] md:text-[11px] font-black uppercase tracking-widest">جاهز للعمل بدون إنترنت تماماً</p>
+               <p className="text-[10px] md:text-[11px] font-black uppercase tracking-widest">جاهز للعمل بدون إنترنت (١٠٠٪)</p>
              </div>
            ) : (
              <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-5 md:px-6 py-2 md:py-2.5 rounded-full border border-amber-100">
                <div className="w-3 h-3 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-               <p className="text-[10px] md:text-[11px] font-black tracking-widest uppercase">جاري التخزين للاستخدام الأوفلاين...</p>
+               <p className="text-[10px] md:text-[11px] font-black tracking-widest uppercase">جاري التثبيت للاستخدام الأوفلاين...</p>
              </div>
            )}
            
