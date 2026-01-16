@@ -19,26 +19,38 @@ const App: React.FC = () => {
   const [isOfflineReady, setIsOfflineReady] = useState(false);
 
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      if (navigator.serviceWorker.controller) {
-        setIsOfflineReady(true);
-      } else {
-        navigator.serviceWorker.ready.then(() => {
-          setIsOfflineReady(true);
-        });
+    // محاولة "لمس" كافة الملفات لضمان دخولها في الكاش
+    const prefetchAssets = async () => {
+      const assets = [
+        './index.tsx',
+        './App.tsx',
+        './components/ConverterCard.tsx',
+        './components/AIAssistant.tsx',
+        './types.ts',
+        './services/geminiService.ts'
+      ];
+      try {
+        await Promise.all(assets.map(asset => fetch(asset, { priority: 'low' })));
+      } catch (e) {
+        console.log('Prefetch failed, likely offline already.');
       }
+    };
+
+    prefetchAssets();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(() => {
+        setIsOfflineReady(true);
+      });
 
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        setIsOfflineReady(true);
+        window.location.reload(); // إعادة التحميل لتفعيل الـ SW الجديد فوراً
       });
     }
 
-    // مؤقت أمان للتأكد من تحديث الحالة للمستخدم
-    const safetyTimer = setTimeout(() => {
-      setIsOfflineReady(true);
-    }, 4000);
-
-    return () => clearTimeout(safetyTimer);
+    // لضمان ظهور الرسالة حتى لو تأخر الـ SW
+    const timer = setTimeout(() => setIsOfflineReady(true), 5000);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -91,7 +103,6 @@ const App: React.FC = () => {
         </div>
       </footer>
 
-      {/* المساعد الذكي */}
       <AIAssistant />
     </div>
   );
