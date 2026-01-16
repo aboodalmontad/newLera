@@ -1,7 +1,7 @@
-const CACHE_NAME = 'lira-safe-v1';
+const CACHE_NAME = 'syrian-lira-pwa-v5';
 
-// قائمة الموارد الحيوية - يجب أن تكون الروابط مطابقة تماماً لما في index.html
-const ASSETS_TO_CACHE = [
+// قائمة الموارد التي سيتم سحبها وتخزينها في جهاز المستخدم فوراً
+const PRE_CACHE_RESOURCES = [
   './',
   './index.html',
   './index.tsx',
@@ -16,24 +16,26 @@ const ASSETS_TO_CACHE = [
   'https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap'
 ];
 
+// مرحلة التثبيت: تحميل كل شيء وتخزينه في الجهاز
 self.addEventListener('install', (event) => {
-  // تفعيل الـ SW فوراً دون انتظار إغلاق التبويبات المفتوحة
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Precaching vital assets...');
+      console.log('Building offline bunker...');
       return Promise.allSettled(
-        ASSETS_TO_CACHE.map(url => 
-          fetch(url, { cache: 'reload' }).then(response => {
-            if (response.ok) return cache.put(url, response);
-            throw new Error(`Failed to cache ${url}`);
-          })
+        PRE_CACHE_RESOURCES.map(url => 
+          fetch(url, { cache: 'reload' })
+            .then(res => {
+              if (res.ok) return cache.put(url, res);
+              throw new Error(`Critical asset failed: ${url}`);
+            })
         )
       );
     })
   );
 });
 
+// مرحلة التنشيط: مسح أي نسخ قديمة ومعطلة
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     Promise.all([
@@ -47,28 +49,27 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// مرحلة الاستجابة: الرد من الجهاز (الذاكرة) أولاً دون محاولة الاتصال بالإنترنت
 self.addEventListener('fetch', (event) => {
-  // استراتيجية: ابحث في الكاش أولاً (Cache First)
+  // لا نريد معالجة طلبات الـ API الخارجية إذا وجدت (مثل Gemini - ولكنها محذوفة حالياً)
+  if (event.request.url.includes('google')) return;
+
   event.respondWith(
-    caches.match(event.request, { ignoreSearch: true }).then((response) => {
-      // إذا وجد المورد في الكاش، أرجعه فوراً
-      if (response) return response;
+    caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
+      // إذا كان الملف موجوداً في الجهاز، أرسله فوراً (سرعة فائقة + أوفلاين)
+      if (cachedResponse) {
+        return cachedResponse;
+      }
       
-      // إذا لم يوجد، حاول جلبه من الشبكة
+      // إذا لم يوجد (ملف جديد مثلاً)، جربه من الشبكة وخزنه للمرة القادمة
       return fetch(event.request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic' && networkResponse.type !== 'cors') {
-          return networkResponse;
+        if (networkResponse && networkResponse.status === 200) {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
         }
-        
-        // قم بتخزين النسخة الجديدة للاستخدام القادم
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
-        
         return networkResponse;
       }).catch(() => {
-        // إذا فشل الإنترنت ولم يجد المورد، ارجع للصفحة الرئيسية
+        // إذا انقطع الإنترنت تماماً ولم يجد الملف، ارجع للرئيسية
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }

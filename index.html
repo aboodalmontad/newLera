@@ -5,14 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>محوّل الليرة السورية الجديد ٢٠٢٦</title>
     <meta name="theme-color" content="#059669" />
-    <meta name="description" content="محوّل الليرة السورية الجديد لحساب حذف الصفرين. يعمل بدون إنترنت تماماً." />
+    <meta name="description" content="محوّل الليرة السورية المعتمد - يعمل بدون إنترنت تماماً." />
     <link rel="manifest" href="./manifest.json" />
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2489/2489756.png" />
     
-    <!-- تحميل Tailwind وتخزينه -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- الخطوط -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
     
     <style>
@@ -22,13 +19,6 @@
         -webkit-tap-highlight-color: transparent;
         overflow-x: hidden;
         user-select: none;
-      }
-      .animate-in {
-        animation: fadeIn 0.4s ease-out forwards;
-      }
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
       }
       .loading-spinner {
         border: 3px solid #f3f3f3;
@@ -60,7 +50,7 @@
     <div id="root">
       <div id="initial-loader" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 20px;">
         <div class="loading-spinner"></div>
-        <p style="color: #64748b; font-weight: bold; font-size: 14px;">جاري تشغيل النظام الوطني المستقل...</p>
+        <p style="color: #64748b; font-weight: bold; font-size: 14px;">جاري تحميل النظام المحلي...</p>
       </div>
     </div>
     <script type="module" src="./index.tsx"></script>
