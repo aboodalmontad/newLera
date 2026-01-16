@@ -18,31 +18,16 @@ const App: React.FC = () => {
   const [isOfflineReady, setIsOfflineReady] = useState(false);
 
   useEffect(() => {
-    // محاولة تخزين الملفات الأساسية في الكاش لضمان الأوفلاين
-    const prefetchAssets = async () => {
-      const assets = [
-        './index.tsx',
-        './App.tsx',
-        './components/ConverterCard.tsx',
-        './types.ts'
-      ];
-      try {
-        await Promise.all(assets.map(asset => fetch(asset, { priority: 'low' })));
-      } catch (e) {
-        console.log('Offline mode active.');
-      }
-    };
-
-    prefetchAssets();
-
+    // التحقق من حالة الـ Service Worker
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then(() => {
+      navigator.serviceWorker.ready.then((registration) => {
         setIsOfflineReady(true);
+        console.log('App is ready for offline use.');
       });
     }
 
-    // fallback لضمان ظهور الحالة
-    const timer = setTimeout(() => setIsOfflineReady(true), 3000);
+    // لضمان التحديث حتى لو كان SW قديماً
+    const timer = setTimeout(() => setIsOfflineReady(true), 2000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -57,7 +42,7 @@ const App: React.FC = () => {
         </h1>
         <div className="flex items-center justify-center gap-2">
           <span className="h-[2px] w-8 bg-emerald-500 rounded-full opacity-30"></span>
-          <p className="text-slate-500 font-medium tracking-wide">الإصدار المعتمد لحذف الصفرين (٢٠٢٦)</p>
+          <p className="text-slate-500 font-medium tracking-wide text-sm md:text-base">نظام حذف الصفرين المعتمد (٢٠٢٦)</p>
           <span className="h-[2px] w-8 bg-emerald-500 rounded-full opacity-30"></span>
         </div>
       </header>
@@ -68,10 +53,10 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      <footer className="mt-16 text-slate-400 text-xs text-center space-y-4 pb-12 opacity-80 animate-in delay-100">
+      <footer className="mt-16 text-slate-400 text-xs text-center space-y-4 pb-12 opacity-80 animate-in delay-200">
         <div className="flex flex-col items-center gap-3">
            <div className="flex flex-col items-center gap-1">
-             <p className="font-black uppercase tracking-[0.3em] text-slate-400">تطبيق وطني خدمي سريع &bull; ٢٠٢٦</p>
+             <p className="font-black uppercase tracking-[0.3em] text-slate-400">تطبيق وطني خدمي &bull; يعمل بدون إنترنت</p>
              
              {isOfflineReady ? (
                <div className="flex items-center gap-1.5 text-emerald-600 bg-emerald-50 px-4 py-1.5 rounded-full border border-emerald-100 animate-in zoom-in">

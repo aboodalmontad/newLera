@@ -1,6 +1,7 @@
-const CACHE_NAME = 'syrian-lira-final-v1';
+const CACHE_NAME = 'syrian-lira-ultra-v2';
 
-const CORE_ASSETS = [
+// قائمة الموارد الإجبارية للعمل بدون إنترنت
+const MANDATORY_ASSETS = [
   './',
   './index.html',
   './index.tsx',
@@ -19,9 +20,15 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return Promise.allSettled(
-        CORE_ASSETS.map(url => 
-          fetch(url, { mode: 'no-cors' }).then(() => cache.add(url)).catch(() => {})
+      // تحميل كافة الموارد دفعة واحدة
+      return Promise.all(
+        MANDATORY_ASSETS.map(url => 
+          fetch(url, { cache: 'reload' })
+            .then(response => {
+              if (response.ok) return cache.put(url, response);
+              throw new Error(`Failed to fetch ${url}`);
+            })
+            .catch(err => console.warn('Pre-cache error:', url, err))
         )
       );
     })
@@ -42,18 +49,23 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // استراتيجية: ابحث في الكاش أولاً، إذا لم تجد اذهب للشبكة
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
+    caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
       if (cachedResponse) {
         return cachedResponse;
       }
       return fetch(event.request).then((networkResponse) => {
+        // تخزين الطلبات الجديدة تلقائياً (مثل الخطوط أو الأيقونات)
         if (networkResponse && networkResponse.status === 200) {
-          const resClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, resClone));
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
         }
         return networkResponse;
       }).catch(() => {
+        // إذا انقطع الإنترنت تماماً ولم يجد الملف في الكاش
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }
